@@ -1,0 +1,102 @@
+<launch>
+    <!-- <include file="src/orcawsdwa/launch/pub.launch">
+      <arg name="node_name" value="pub_sub41" />
+      <arg name="target_model_name" value="model2.1" /> 
+      <arg name="goal_pose_x"  value="9.5" />
+      <arg name="goal_pose_y"  value="-3" />
+      <arg name="goal_pose_z"  value="0.5" />
+      <arg name="/pose_stamped_topic"  value="/pose_stamped_topic41" />
+      <arg name="/path_topic"  value="/path_topic41" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub42" />
+     <arg name="target_model_name"  value="model2.2" />
+     <arg name="goal_pose_x"  value="9.5" />
+     <arg name="goal_pose_y"  value="3.0" />
+     <arg name="goal_pose_z"  value="0.5" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic42" />
+     <arg name="/path_topic"  value="/path_topic42" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub43" />
+     <arg name="target_model_name" value="model2.3" />
+     <arg name="goal_pose_x"  value="1.8" />
+     <arg name="goal_pose_y"  value="10.0" />
+     <arg name="goal_pose_z"  value="0.5" />   
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic43" />
+     <arg name="/path_topic"  value="/path_topic43" />     
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub44" />
+     <arg name="target_model_name" value="model2.4" />
+     <arg name="goal_pose_x"  value="7.5" />
+     <arg name="goal_pose_y"  value="9.5" />
+     <arg name="goal_pose_z"  value="0.5" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic44" />
+     <arg name="/path_topic"  value="/path_topic44" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub45" />
+     <arg name="target_model_name"  value="model2.5" />
+     <arg name="goal_pose_x"  value="-2.7" />
+     <arg name="goal_pose_y"  value="10" />
+     <arg name="goal_pose_z"  value="0.5" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic45" />
+     <arg name="/path_topic"  value="/path_topic45" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub46" />
+     <arg name="target_model_name" value="model2.6" />
+     <arg name="goal_pose_x"  value="-8" />
+     <arg name="goal_pose_y"  value="7.3" />
+     <arg name="goal_pose_z"  value="0.5" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic46" />
+     <arg name="/path_topic"  value="/path_topic46" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub47" />
+     <arg name="target_model_name"  value="model2.7" />
+     <arg name="goal_pose_x"  value="-8" />
+     <arg name="goal_pose_y"  value="-0.75" />
+     <arg name="goal_pose_z"  value="0.5" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic47" />
+     <arg name="/path_topic"  value="/path_topic47" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub48" />
+     <arg name="target_model_name"  value="model2.8" />
+     <arg name="goal_pose_x"  value="-6" />
+     <arg name="goal_pose_y"  value="-5.6" />
+     <arg name="goal_pose_z"  value="0.5" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic48" />
+     <arg name="/path_topic"  value="/path_topic48" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub49" />
+     <arg name="target_model_name" value="model2.9" />
+     <arg name="goal_pose_x"  value="1.5" />
+     <arg name="goal_pose_y"  value="-8" />
+     <arg name="goal_pose_z"  value="0.5" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic49" />
+     <arg name="/path_topic"  value="/path_topic49" />
+    </include> -->
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub50" />
+     <arg name="target_model_name"  value="model2.10" />
+     <arg name="goal_pose_x"  value="7.9" />
+     <arg name="goal_pose_y"  value="-9.0" />
+     <arg name="goal_pose_z"  value="0.5" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic50" />
+     <arg name="/path_topic"  value="/path_topic50" />
+    </include>
+
+</launch>
