@@ -1,5 +1,5 @@
 <launch>
-    <!-- <include file="src/orcawsdwa/launch/pub.launch">
+    <include file="src/orcawsdwa/launch/pub.launch">
       <arg name="node_name" value="pub_sub41" />
       <arg name="target_model_name" value="model2.1" /> 
       <arg name="goal_pose_x"  value="9.5" />
@@ -87,7 +87,7 @@
      <arg name="goal_pose_z"  value="0.5" />
      <arg name="/pose_stamped_topic"  value="/pose_stamped_topic49" />
      <arg name="/path_topic"  value="/path_topic49" />
-    </include> -->
+    </include>
 
     <include file="src/orcawsdwa/launch/pub.launch">
      <arg name="node_name" value="pub_sub50" />

@@ -110,7 +110,9 @@ namespace RVO
       new_pose.position.y = agentPosition.y() + newVelocity.y() * time;
       std::cout << "Moved to new position: x=" << final_pose.position.x << ", y=" << final_pose.position.y << std::endl;
     }
-    RVO::DWAPlanner planner(new_pose, obstacle_poses, max_linear_speed, max_angular_speed, time, num, agentpose);
+    // 求解速度矢量的朝向
+    double theta = atan2(newVelocity.y(), newVelocity.x());
+    RVO::DWAPlanner planner(new_pose, obstacle_poses, max_linear_speed, max_angular_speed, time, num, agentpose,theta);
     // 查找最佳速度，final_pose，最佳分数
     const geometry_msgs::Twist &best_twist = planner.FindBestTwist(agentpose);
     std::cout << " best_twist.linear.xx=" << best_twist.linear.x << ", y=" << best_twist.angular.z << std::endl;
@@ -125,7 +127,6 @@ namespace RVO
     newpose = final_pose;
     newposes.push_back(newpose);
     std::size_t size = newposes.size();
-    std::cout << "a111size:" << size << std::endl;
     // 发布pose信息
     geometry_msgs::PoseStamped pose_stamped_msg;
     pose_stamped_msg.header.stamp = ros::Time::now(); // 使用当前时间作为时间戳

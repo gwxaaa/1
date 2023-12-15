@@ -22,6 +22,7 @@ namespace RVO
     double best_final_score;
     double num;
     double time;
+    double theta;
     double score;
     double some_threshold;
     float max_distance;
@@ -30,7 +31,7 @@ namespace RVO
   public:
     DWAPlanner(const geometry_msgs::Pose &new_pose, const std::vector<geometry_msgs::Pose> &obstacles,
                double max_linear_speed, double max_angular_speed,
-               double time, double num, const geometry_msgs::Pose &current_pose);
+               double time, double num, const geometry_msgs::Pose &current_pose,double theta);
         ~DWAPlanner();
     // 主要函数，用于计算并返回最佳速度
     const geometry_msgs::Twist &FindBestTwist(const geometry_msgs::Pose &current_pose);
@@ -54,7 +55,7 @@ namespace RVO
     // 计算距离
     double CalculateDistance(const geometry_msgs::Pose &final_pose);
     //计算计算角度，也就是朝向的区别---借助模型此刻的四元数信息
-    double CalculateyawDistance(const geometry_msgs::Pose& final_pose);
+    double CalculateyawDistance(const geometry_msgs::Twist twist,const geometry_msgs::Pose& final_pose,double theta);
     double FindMaxDistance(const std::vector<geometry_msgs::Twist> &twist_vector,
                            const geometry_msgs::Pose &current_pose);
     // 评估速度和角速度组合的得分----根据得分得到最佳速度

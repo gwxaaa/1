@@ -12,7 +12,7 @@
      <param name="target_model/twist_angular_z" type="double" value="1.0" />
      <param name="neighbor_distance" type="double" value="2.0" />
      <param name="time_horizon" type="double" value="2.0" />
-     <param name="radius_" type="double" value="0.6" />  
+     <param name="radius_" type="double" value="0.8" />  
      <param name="goal_pose_x" type="double" value="$(arg goal_pose_x)" />
      <param name="goal_pose_y" type="double" value="$(arg goal_pose_y)" />
      <param name="goal_pose_z" type="double" value="$(arg goal_pose_z)" />
