@@ -36,7 +36,7 @@ namespace RVO
     ros::NodeHandle nh;
     target_model_ = modelName;
     model_states_sub_ = nh.subscribe("/gazebo/model_states", 10, &ModelSubPub::modelStatesCallback, this);
-    model_states_pub_ = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 10);
+    model_states_pub_ = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 100);
     pose_stamped_pub_ = nh.advertise<geometry_msgs::PoseStamped>("/pose_stamped_topic", 10); // 新增的发布器
     path_pub_ = nh.advertise<nav_msgs::Path>("/path_topic", 10);
   }
@@ -108,7 +108,7 @@ namespace RVO
     {
       new_pose.position.x = agentPosition.x() + newVelocity.x() * time;
       new_pose.position.y = agentPosition.y() + newVelocity.y() * time;
-      std::cout << "Moved to new position: x=" << final_pose.position.x << ", y=" << final_pose.position.y << std::endl;
+      std::cout << "Moved to new position: x=" << new_pose.position.x << ", y=" << new_pose.position.y << std::endl;
     }
     // 求解速度矢量的朝向
     double theta = atan2(newVelocity.y(), newVelocity.x());

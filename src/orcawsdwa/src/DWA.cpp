@@ -199,22 +199,21 @@ namespace RVO
     //   distance=-distance;
     // }
     // 设置权重
-    double distance_weight = -1;
-    double yaw_weight = -3;
+    double distance_weight = -4;
+    double yaw_weight = -4;
     double collision_weight = 100;
     // 计算距离分数和碰撞分数
     double distance_score = distance_weight * distance;
     double yaw_score = yaw_weight * yaw;
     double collision_score = collision_weight * collision;
     // 计算总分数
-    double score = collision_score+ distance_score+yaw_score;
+    double score =100+ distance_score+yaw_score;
     // 如果当前分数比最佳分数高，更新最佳分数和对应的 twist 值
     if (score > best_final_score)
     {
       best_final_score = score;
       best_twist = twist;
     }
-    std::cout << "score x=" << score << std::endl;
     return score;
   }
 }
