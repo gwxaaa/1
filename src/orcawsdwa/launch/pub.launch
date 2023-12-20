@@ -16,11 +16,11 @@
      <param name="goal_pose_x" type="double" value="$(arg goal_pose_x)" />
      <param name="goal_pose_y" type="double" value="$(arg goal_pose_y)" />
      <param name="goal_pose_z" type="double" value="$(arg goal_pose_z)" />
-     <param name="num" type="double" value="70" />
+     <param name="num" type="double" value="40" />
      <param name="time" type="double" value="0.1" />
      <param name="max_speed" type="double" value="10.0" />
-     <param name="max_angular_speed" type="double" value="5" />
-     <param name="max_linear_speed" type="double" value="5" />
+     <param name="max_angular_speed" type="double" value="7" />
+     <param name="max_linear_speed" type="double" value="7" />
      <remap from="/pose_stamped_topic" to="$(arg /pose_stamped_topic)" />
      <remap from="/path_topic" to="$(arg /path_topic)" />
     </node>

@@ -35,8 +35,8 @@ namespace RVO
     // 初始化ROS节点
     ros::NodeHandle nh;
     target_model_ = modelName;
-    model_states_sub_ = nh.subscribe("/gazebo/model_states", 10, &ModelSubPub::modelStatesCallback, this);
-    model_states_pub_ = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 100);
+    model_states_sub_ = nh.subscribe("/gazebo/model_states", 1, &ModelSubPub::modelStatesCallback, this);
+    model_states_pub_ = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 10);
     pose_stamped_pub_ = nh.advertise<geometry_msgs::PoseStamped>("/pose_stamped_topic", 10); // 新增的发布器
     path_pub_ = nh.advertise<nav_msgs::Path>("/path_topic", 10);
   }
@@ -97,7 +97,8 @@ namespace RVO
                      neighborDistance_, timeHorizon_, other_models_states, radius_);
     RVO::Vector2 newVelocity = agent.computeNewVelocity(agentPosition, agentVelocity,
                                                         goalPosition, agentNeighbors_, obstacleNeighbors_, time);
-    // 知道速度矢量，将位置计算出来，对位置进行对比。
+
+    // 知道速度矢量，将位置计算出来，对位置进行对比。----
     if (std::isnan(newVelocity.x()) || std::isnan(newVelocity.y()))
     {
       new_pose.position.x = agentPosition.x();
@@ -111,14 +112,40 @@ namespace RVO
       std::cout << "Moved to new position: x=" << new_pose.position.x << ", y=" << new_pose.position.y << std::endl;
     }
     // 求解速度矢量的朝向
-    double theta = atan2(newVelocity.y(), newVelocity.x());
-    RVO::DWAPlanner planner(new_pose, obstacle_poses, max_linear_speed, max_angular_speed, time, num, agentpose,theta);
+    // if (newVelocity != lastStoredNewVelocity)
+    // {
+    //   newVelocities.push_back(newVelocity); // 将上一次存储的速度放入容器
+    //   lastStoredNewVelocity = newVelocity;  // 初始信息设置为0，也就是初始的位置不论朝向怎么样，都根据相关的速度计算得到角速度。
+    //   // 速度改变，将旧的值给last
+    //   lastvelocity = newVelocities[newVelocities.size() - 2];
+    //   // 更新存储的新速度为当前计算得到的新速度
+    // }
+    // double theta1 = atan2(newVelocity.y(), newVelocity.x());
+    // std::cout << " theta .xx=" << theta1 << std::endl;
+    // double initialtheta2 = atan2(lastvelocity.y(), lastvelocity.x());
+    // // new_twist.angular.z = (theta - initialtheta2) / time;
+    // double theta2 = theta1 - initialtheta2;
+    // std::cout << "gle_diff.z :" << initialtheta2 << std::endl;
+    // // // 这里要保证角速度的大小方向，让其值范围在-M_PI---M_PI；
+    // double theta = std::remainder(theta2, 2.0 * M_PI);
+    // std::cout << "theta :" << theta << std::endl;
+    final_pose=agentpose;
+    double final_yaw = atan2(
+        2.0 * (final_pose.orientation.z * final_pose.orientation.w + final_pose.orientation.x * final_pose.orientation.y),
+        1.0 - 2.0 * (final_pose.orientation.y * final_pose.orientation.y +
+                     final_pose.orientation.z * final_pose.orientation.z));
+
+    double theta1 = atan2(newVelocity.y(), newVelocity.x());
+     double theta=theta1-final_yaw;
+    RVO::DWAPlanner planner(new_pose, obstacle_poses, max_linear_speed, max_angular_speed, time, num, agentpose, theta);
     // 查找最佳速度，final_pose，最佳分数
     const geometry_msgs::Twist &best_twist = planner.FindBestTwist(agentpose);
     std::cout << " best_twist.linear.xx=" << best_twist.linear.x << ", y=" << best_twist.angular.z << std::endl;
     geometry_msgs::Pose final_pose;
     KinematicModel kinematic_model(agentpose, best_twist);
     final_pose = kinematic_model.calculateNewPosition(time);
+    std::cout << "reMoved to new position: x=" << final_pose.position.x << ", y=" << final_pose.position.y << std::endl;
+      std::cout << "rfinal_yaw: x=" << final_yaw<< std::endl;                  
     // 发布信息
     gazebo_msgs::ModelState model_state;
     model_state.model_name = agentname;

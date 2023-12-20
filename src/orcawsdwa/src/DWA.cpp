@@ -40,14 +40,13 @@ namespace RVO
       double distance_to_target = CalculateDistance(final_pose);
       // 检查碰撞
       double collision = CalculateCollision(final_pose);
-      double yawdistance = CalculateyawDistance(twist,final_pose, theta);
+      double yawdistance = CalculateyawDistance(twist, final_pose, theta);
       // 如果当前组合的分数更高，更新最佳分数和速度角速度
       double score = CalculateScore(current_twist);
-      // std::cout << "Score: " << score << std::endl;
       // std::cout << "Score1: " << best_final_score << std::endl;
-      // std::cout << "twist: " << current_twist<< std::endl;
-      //    std::cout << " - Best Final Pose: x = " << final_pose.position.x << ", y = " << final_pose.position.y <<
-      // std::endl;
+      // std::cout << " - current_twist: x = " << current_twist.linear.x << ", y = " << current_twist.angular.z << std::endl;
+      // std::cout << "Score: " << score << std::endl;
+      // std::cout << "2rfinal_yaw: x=" << final_yaw << std::endl;
       if (score > best_final_score)
       {
         best_final_score = score;
@@ -167,7 +166,7 @@ namespace RVO
     double distance = normalized_distance_distance;
     return distance;
   }
-  double DWAPlanner::CalculateyawDistance(const geometry_msgs::Twist twist, const geometry_msgs::Pose &final_pose, double theta)
+  double DWAPlanner::CalculateyawDistance(const geometry_msgs::Twist twist, const geometry_msgs::Pose &current_pose, double theta)
   {
     // 计算朝向之间的角度差异
     // double target_yaw = atan2(2.0 * (new_pose.orientation.z * new_pose.orientation.w +
@@ -175,14 +174,24 @@ namespace RVO
     //                           1.0 - 2.0 * (new_pose.orientation.y * new_pose.orientation.y +
     //                                        new_pose.orientation.z * new_pose.orientation.z));
     double target_yaw = theta;
+    // 对于ORCA算法，所得到的角度是与坐标系的结果，那么需要与整体的朝向进行对比。
+    // fanal_yaw就是最后的朝向，也就是初始模型朝向加上转换角度得到的结果。
     double final_yaw = twist.angular.z * time;
     // double final_yaw = atan2(
     //     2.0 * (final_pose.orientation.z * final_pose.orientation.w + final_pose.orientation.x * final_pose.orientation.y),
     //     1.0 - 2.0 * (final_pose.orientation.y * final_pose.orientation.y +
     //                  final_pose.orientation.z * final_pose.orientation.z));
-    double yaw_difference = std::abs(target_yaw - final_yaw);
+    // geometry_msgs::Pose modelPose;
+    // modelPose = current_pose;
+    // double initial_yaw = atan2(2.0 * (modelPose.orientation.w * modelPose.orientation.z + modelPose.orientation.x * modelPose.orientation.y),
+    //                            1.0 - 2.0 * (modelPose.orientation.y * modelPose.orientation.y + modelPose.orientation.z * modelPose.orientation.z));
+
+    // double final_yaw= initial_yaw+final_yaw1;
+    double yaw_difference1 = std::abs(target_yaw - final_yaw);
+    // double yaw_difference2 = ((yaw_difference1 > 0 && final_yaw > 0) || (yaw_difference1 < 0 && final_yaw < 0)) ? -0.5 : 0.1;
     // 将角度差归一化为 [0, 1]
-    double normalized_angle_distance = yaw_difference / 2 * M_PI;
+    double yaw_difference2 = 0;
+    double normalized_angle_distance = yaw_difference1 / 2 * M_PI + yaw_difference2;
     double angle = normalized_angle_distance;
     return angle;
   }
@@ -193,21 +202,21 @@ namespace RVO
     double distance = CalculateDistance(final_pose);
     // 计算碰撞惩罚
     double collision = CalculateCollision(final_pose);
-    double yaw = CalculateyawDistance(twist,final_pose, theta);
+    double yaw = CalculateyawDistance(twist, final_pose, theta);
     // if (collision<1)
     // {
     //   distance=-distance;
     // }
     // 设置权重
-    double distance_weight = -4;
+    double distance_weight = -5;
     double yaw_weight = -4;
-    double collision_weight = 100;
+    double collision_weight = 1000;
     // 计算距离分数和碰撞分数
     double distance_score = distance_weight * distance;
     double yaw_score = yaw_weight * yaw;
     double collision_score = collision_weight * collision;
     // 计算总分数
-    double score =100+ distance_score+yaw_score;
+    double score = collision_weight + distance_score + yaw_score;
     // 如果当前分数比最佳分数高，更新最佳分数和对应的 twist 值
     if (score > best_final_score)
     {
