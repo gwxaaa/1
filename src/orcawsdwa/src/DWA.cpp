@@ -8,12 +8,12 @@
 #include <KinematicModel.h>
 namespace RVO
 {
-  DWAPlanner::DWAPlanner(const geometry_msgs::Pose &new_pose, const std::vector<geometry_msgs::Pose> &obstacles,
+  DWAPlanner::DWAPlanner(const geometry_msgs::Pose &new_pose, const std::vector<gazebo_msgs::ModelState> &other_models_states,
                          double max_linear_speed, double max_angular_speed, double time, double num,
                          const geometry_msgs::Pose &current_pose, double theta_)
-      : new_pose(new_pose), obstacles(obstacles), max_distance(1.0), some_threshold(some_threshold),
+      : new_pose(new_pose), obstacles(convertToObstacles(other_models_states)), max_distance(1.0), some_threshold(some_threshold),
         max_linear_speed(max_linear_speed), max_angular_speed(max_angular_speed), time(time), num(num),
-        theta(theta)
+        theta(theta_)
   {
   }
   DWAPlanner::~DWAPlanner()
@@ -87,51 +87,126 @@ namespace RVO
     geometry_msgs::Pose final_pose = kinematic_model.calculateNewPosition(time);
     return final_pose;
   }
-
   double DWAPlanner::CalculateCollision(const geometry_msgs::Pose &final_pose)
   {
-    double min_collision_distance = 0.4;       // 最小碰撞距离
-    double avoidance_distance = 1.5;           // 避障范围起始距离
-    double collision_distance_threshold = 1.5; // 碰撞阈值
+    // 初始化参数
+    double min_collision_distance_model = 0.5; // model的最小碰撞距离
+    double avoidance_distance_model = 1.4;     // model的避障范围起始距离
+    // double collision_distance_threshold_model = 1.6; // model的碰撞阈值
 
-    double distance_to_obstacle = std::numeric_limits<double>::max();
+    double min_collision_distance_other = 0.2; // 其他的最小碰撞距离
+    double avoidance_distance_other = 0.8;     // 其他的避障范围起始距离
+                                               // double collision_distance_threshold_other = 0.8; // 其他的碰撞阈值
 
-    for (const geometry_msgs::Pose &obstacle : obstacles)
+    double closest_distance_to_obstacle_model = std::numeric_limits<double>::max();
+    double closest_distance_to_obstacle_other = std::numeric_limits<double>::max();
+    // 循环遍历障碍物
+
+    for (const auto &obstacle : obstacles)
     {
-      double dx = final_pose.position.x - obstacle.position.x;
-      double dy = final_pose.position.y - obstacle.position.y;
+      // std::cout << "Obstacle Name: " << obstacle.name << std::endl;
+      // std::cout << "Obstacle Pose (x, y): (" << obstacle.pose.position.x << ", " << obstacle.pose.position.y << ")" << std::endl;
+      double dx = final_pose.position.x - obstacle.pose.position.x;
+      double dy = final_pose.position.y - obstacle.pose.position.y;
       double distance = std::sqrt(dx * dx + dy * dy);
 
-      if (distance < distance_to_obstacle)
+      if (obstacle.name.find("model") != std::string::npos)
       {
-        distance_to_obstacle = distance;
+        if (distance < closest_distance_to_obstacle_model)
+        {
+          closest_distance_to_obstacle_model = distance;
+        }
+      }
+      else
+      {
+        if (distance < closest_distance_to_obstacle_other)
+        {
+          closest_distance_to_obstacle_other = distance;
+        }
       }
     }
 
-    if (distance_to_obstacle < min_collision_distance)
+    // 根据最终的距离计算碰撞分数
+    if (closest_distance_to_obstacle_model < min_collision_distance_model)
     {
-      // 如果距离障碍物小于最小碰撞距离，直接返回0分表示碰撞
       return 0.0;
     }
-    else if (distance_to_obstacle <= avoidance_distance)
+    else if (closest_distance_to_obstacle_model <= avoidance_distance_model)
     {
-      // 如果距离障碍物在避障范围内，根据距离插值计算分数
-      double score = 1.0 - (distance_to_obstacle - min_collision_distance) /
-                               (avoidance_distance - min_collision_distance);
+      // 计算model的避障范围内分数
+      double score = 1.0 - (closest_distance_to_obstacle_model - min_collision_distance_model) /
+                               (avoidance_distance_model - min_collision_distance_model);
       return score;
     }
-    else if (distance_to_obstacle <= collision_distance_threshold)
+    // else if (closest_distance_to_obstacle_model <= collision_distance_threshold_model)
+    // {
+    //   return 0.5;
+    // }
+    else if (closest_distance_to_obstacle_other < min_collision_distance_other)
     {
-      // 如果距离障碍物在碰撞阈值内，给予一定的分数
-      double score = 0.5; // 你可以根据需要调整这个分数
+      return 0.0;
+    }
+    else if (closest_distance_to_obstacle_other <= avoidance_distance_other)
+    {
+      // 计算其他障碍物的避障范围内分数
+      double score = 1.0 - (closest_distance_to_obstacle_other - min_collision_distance_other) /
+                               (avoidance_distance_other - min_collision_distance_other);
       return score;
     }
+    // else if (closest_distance_to_obstacle_other <= collision_distance_threshold_other)
+    // {
+    //   return 0.5;
+    // }
     else
     {
-      // 如果没有遇到障碍物或者距离障碍物超出碰撞阈值，返回最高分数
       return 1.0;
     }
   }
+
+  // double DWAPlanner::CalculateCollision(const geometry_msgs::Pose &final_pose)
+  // {
+  //   double min_collision_distance = 0.4;       // 最小碰撞距离
+  //   double avoidance_distance = 1.5;           // 避障范围起始距离
+  //   double collision_distance_threshold = 1.5; // 碰撞阈值
+
+  //   double distance_to_obstacle = std::numeric_limits<double>::max();
+
+  //   for (const geometry_msgs::Pose &obstacle : obstacles)
+  //   {
+  //     double dx = final_pose.position.x - obstacle.position.x;
+  //     double dy = final_pose.position.y - obstacle.position.y;
+  //     double distance = std::sqrt(dx * dx + dy * dy);
+
+  //     if (distance < distance_to_obstacle)
+  //     {
+  //       distance_to_obstacle = distance;
+  //     }
+  //   }
+
+  //   if (distance_to_obstacle < min_collision_distance)
+  //   {
+  //     // 如果距离障碍物小于最小碰撞距离，直接返回0分表示碰撞
+  //     return 0.0;
+  //   }
+  //   else if (distance_to_obstacle <= avoidance_distance)
+  //   {
+  //     // 如果距离障碍物在避障范围内，根据距离插值计算分数
+  //     double score = 1.0 - (distance_to_obstacle - min_collision_distance) /
+  //                              (avoidance_distance - min_collision_distance);
+  //     return score;
+  //   }
+  //   else if (distance_to_obstacle <= collision_distance_threshold)
+  //   {
+  //     // 如果距离障碍物在碰撞阈值内，给予一定的分数
+  //     double score = 0.5; // 你可以根据需要调整这个分数
+  //     return score;
+  //   }
+  //   else
+  //   {
+  //     // 如果没有遇到障碍物或者距离障碍物超出碰撞阈值，返回最高分数
+  //     return 1.0;
+  //   }
+  // }
 
   double DWAPlanner::FindMaxDistance(const std::vector<geometry_msgs::Twist> &twist_vector,
                                      const geometry_msgs::Pose &current_pose)
@@ -190,8 +265,8 @@ namespace RVO
     double yaw_difference1 = std::abs(target_yaw - final_yaw);
     // double yaw_difference2 = ((yaw_difference1 > 0 && final_yaw > 0) || (yaw_difference1 < 0 && final_yaw < 0)) ? -0.5 : 0.1;
     // 将角度差归一化为 [0, 1]
-    double yaw_difference2 = 0;
-    double normalized_angle_distance = yaw_difference1 / 2 * M_PI + yaw_difference2;
+    //double yaw_difference2 = 0;
+    double normalized_angle_distance = yaw_difference1 / 2 * M_PI ;
     double angle = normalized_angle_distance;
     return angle;
   }
@@ -208,7 +283,7 @@ namespace RVO
     //   distance=-distance;
     // }
     // 设置权重
-    double distance_weight = -5;
+    double distance_weight = -4;
     double yaw_weight = -4;
     double collision_weight = 1000;
     // 计算距离分数和碰撞分数
@@ -224,5 +299,17 @@ namespace RVO
       best_twist = twist;
     }
     return score;
+  }
+  std::vector<MyObstacle> DWAPlanner::convertToObstacles(const std::vector<gazebo_msgs::ModelState> &other_models_states)
+  {
+    std::vector<MyObstacle> obstacles;
+    for (const auto &model_state : other_models_states)
+    {
+      MyObstacle obstacle;
+      obstacle.name = model_state.model_name;
+      obstacle.pose = model_state.pose;
+      obstacles.push_back(obstacle);
+    }
+    return obstacles;
   }
 }

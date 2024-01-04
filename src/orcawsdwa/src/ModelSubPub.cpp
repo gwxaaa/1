@@ -43,9 +43,8 @@ namespace RVO
   // 回调函数，处理模型状态信息
   void ModelSubPub::modelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg)
   {
+
     other_models_states.clear();
-    // gazebo_msgs::ModelState target_model_state;
-    // 遍历所有模型
     for (size_t i = 0; i < msg->name.size(); ++i)
     {
       if (msg->name[i] == target_model_)
@@ -80,15 +79,8 @@ namespace RVO
     double velocityX1 = (goalPosition.x() - agentPosition.x()) * 0.1;
     double velocityY1 = (goalPosition.y() - agentPosition.y()) * 0.1;
     Vector2 prefVelocity(velocityX1, velocityY1);
-    // 障碍物信息的存储
-    obstacle_poses.clear(); // 清空 obstacle_poses，确保它是空的
-    // 将 other_models_states 中的数据转移到 obstacle_poses 中
-    for (const auto &model_state : other_models_states)
-    {
-      geometry_msgs::Pose pose = model_state.pose;
-      obstacle_poses.push_back(pose);
-    }
-    // 开始计算ORCA算法
+
+    //  开始计算ORCA算法
     RVO::Neighbor neighborobject(*this);
     // // 获取计算后的邻居信息
     std::vector<RVO::Agent *> agentNeighbors_ = neighborobject.getAgentNeighbors();
@@ -111,46 +103,30 @@ namespace RVO
       new_pose.position.y = agentPosition.y() + newVelocity.y() * time;
       std::cout << "Moved to new position: x=" << new_pose.position.x << ", y=" << new_pose.position.y << std::endl;
     }
-    // 求解速度矢量的朝向
-    // if (newVelocity != lastStoredNewVelocity)
-    // {
-    //   newVelocities.push_back(newVelocity); // 将上一次存储的速度放入容器
-    //   lastStoredNewVelocity = newVelocity;  // 初始信息设置为0，也就是初始的位置不论朝向怎么样，都根据相关的速度计算得到角速度。
-    //   // 速度改变，将旧的值给last
-    //   lastvelocity = newVelocities[newVelocities.size() - 2];
-    //   // 更新存储的新速度为当前计算得到的新速度
-    // }
-    // double theta1 = atan2(newVelocity.y(), newVelocity.x());
-    // std::cout << " theta .xx=" << theta1 << std::endl;
-    // double initialtheta2 = atan2(lastvelocity.y(), lastvelocity.x());
-    // // new_twist.angular.z = (theta - initialtheta2) / time;
-    // double theta2 = theta1 - initialtheta2;
-    // std::cout << "gle_diff.z :" << initialtheta2 << std::endl;
-    // // // 这里要保证角速度的大小方向，让其值范围在-M_PI---M_PI；
-    // double theta = std::remainder(theta2, 2.0 * M_PI);
-    // std::cout << "theta :" << theta << std::endl;
-    final_pose=agentpose;
+    // 这里需要注意，最后朝向和ORCA结果不同，是机器人的朝向。
+    final_pose = agentpose;
     double final_yaw = atan2(
         2.0 * (final_pose.orientation.z * final_pose.orientation.w + final_pose.orientation.x * final_pose.orientation.y),
         1.0 - 2.0 * (final_pose.orientation.y * final_pose.orientation.y +
                      final_pose.orientation.z * final_pose.orientation.z));
-
     double theta1 = atan2(newVelocity.y(), newVelocity.x());
-     double theta=theta1-final_yaw;
-    RVO::DWAPlanner planner(new_pose, obstacle_poses, max_linear_speed, max_angular_speed, time, num, agentpose, theta);
+    double theta = theta1 - final_yaw;
+    // double theta = atan2(newVelocity.y(), newVelocity.x());
+
+    RVO::DWAPlanner planner(new_pose, other_models_states, max_linear_speed, max_angular_speed, time, num, agentpose, theta);
     // 查找最佳速度，final_pose，最佳分数
     const geometry_msgs::Twist &best_twist = planner.FindBestTwist(agentpose);
     std::cout << " best_twist.linear.xx=" << best_twist.linear.x << ", y=" << best_twist.angular.z << std::endl;
     geometry_msgs::Pose final_pose;
     KinematicModel kinematic_model(agentpose, best_twist);
     final_pose = kinematic_model.calculateNewPosition(time);
-    std::cout << "reMoved to new position: x=" << final_pose.position.x << ", y=" << final_pose.position.y << std::endl;
-      std::cout << "rfinal_yaw: x=" << final_yaw<< std::endl;                  
+    // std::cout << "reMoved to new position: x=" << final_pose.position.x << ", y=" << final_pose.position.y << std::endl;
+    //   std::cout << "rfinal_yaw: x=" << final_yaw<< std::endl;
     // 发布信息
-    gazebo_msgs::ModelState model_state;
-    model_state.model_name = agentname;
-    model_state.pose = final_pose;
-    model_states_pub_.publish(model_state);
+    gazebo_msgs::ModelState amodel_state;
+    amodel_state.model_name = agentname;
+    amodel_state.pose = final_pose;
+    model_states_pub_.publish(amodel_state);
     newpose = final_pose;
     newposes.push_back(newpose);
     std::size_t size = newposes.size();

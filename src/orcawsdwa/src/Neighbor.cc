@@ -5,15 +5,22 @@
 #include "Obstacle.h"
 #include "Vector2.h"
 #include "Neighbor.h"
-
-namespace RVO {
-    Neighbor::Neighbor(const ModelSubPub & modelSubPub) : modelSubPub_(modelSubPub) {
-        double radius_=modelSubPub.radius_;
+namespace RVO
+{
+    Neighbor::Neighbor(const ModelSubPub &modelSubPub) : modelSubPub_(modelSubPub)
+    {
+        double radius_ = modelSubPub.radius_;
         std::vector<gazebo_msgs::ModelState> other_models_states = modelSubPub_.getothermodels();
-        if (!other_models_states.empty()) {
+
+        if (!other_models_states.empty())
+        {
             ROS_INFO("Number of other models: %zu", other_models_states.size());
-            for (const gazebo_msgs::ModelState& model_state : other_models_states) {
-                if (isAgent(model_state)) {
+
+            for (const gazebo_msgs::ModelState &model_state : other_models_states)
+            {
+                std::string model_name = model_state.model_name;
+                if (modelNameContainsString(model_name, "model"))
+                {
                     const geometry_msgs::Pose &pose = model_state.pose;
                     const geometry_msgs::Twist &twist = model_state.twist;
                     Vector2 point(pose.position.x, pose.position.y);
@@ -21,38 +28,100 @@ namespace RVO {
                     double velocityX = twist.linear.x * cos(deltaTheta);
                     double velocityY = twist.linear.x * sin(deltaTheta);
                     Vector2 velocity_(velocityX, velocityY);
-                    Agent* newAgent = new Agent(point, velocity_,radius_);
+                    Agent *newAgent = new Agent(point, velocity_, radius_);
                     agentNeighbors_.push_back(newAgent);
-                    //智能体是可以的
-                } else if (isObstacle(model_state)) {
+                }
+                else
+                {
+                    radius_=0.1;
                     const geometry_msgs::Pose &pose = model_state.pose;
                     const geometry_msgs::Twist &twist = model_state.twist;
-                    Vector2 position(pose.position.x, pose.position.y);
+                    Vector2 point(pose.position.x, pose.position.y);
                     double deltaTheta = twist.angular.z * time;
                     double velocityX = twist.linear.x * cos(deltaTheta);
                     double velocityY = twist.linear.x * sin(deltaTheta);
                     Vector2 velocity_(velocityX, velocityY);
-                    Obstacle* newObstacle = new Obstacle(position, velocity_);
-                    obstacleNeighbors_.push_back(newObstacle);
+                    // Obstacle *newObstacle = new Obstacle(position, velocity_, nextObstacle, false);
+                    // newObstacle = new Obstacle(point, newObstacle, false);
+                    // obstacleNeighbors_.push_back(newObstacle);
+                    Agent *newAgent = new Agent(point, velocity_, radius_);
+                    agentNeighbors_.push_back(newAgent);
                 }
             }
-        } else {
+        }
+        else
+        {
             ROS_INFO("No other models received.");
         }
     }
-    std::vector<Agent*> Neighbor::getAgentNeighbors() const {
+
+    bool Neighbor::modelNameContainsString(const std::string &model_name, const std::string &search_string)
+    {
+        return model_name.find(search_string) != std::string::npos;
+    }
+    std::vector<Agent *> Neighbor::getAgentNeighbors() const
+    {
         return agentNeighbors_;
     }
-    std::vector<Obstacle*> Neighbor::getObstacleNeighbors() const {
+    std::vector<Obstacle *> Neighbor::getObstacleNeighbors() const
+    {
         return obstacleNeighbors_;
     }
+}
+// #include <algorithm>
+// #include <utility>
+// #include "Agent.h"
+// #include "Obstacle.h"
+// #include "Vector2.h"
+// #include "Neighbor.h"
+
+// namespace RVO {
+//     Neighbor::Neighbor(const ModelSubPub & modelSubPub) : modelSubPub_(modelSubPub) {
+//         double radius_=modelSubPub.radius_;
+//         std::vector<gazebo_msgs::ModelState> other_models_states = modelSubPub_.getothermodels();
+//         if (!other_models_states.empty()) {
+//             ROS_INFO("Number of other models: %zu", other_models_states.size());
+//             for (const gazebo_msgs::ModelState& model_state : other_models_states) {
+//                 if (isAgent(model_state)) {
+//                     const geometry_msgs::Pose &pose = model_state.pose;
+//                     const geometry_msgs::Twist &twist = model_state.twist;
+//                     Vector2 point(pose.position.x, pose.position.y);
+//                     double deltaTheta = twist.angular.z * time;
+//                     double velocityX = twist.linear.x * cos(deltaTheta);
+//                     double velocityY = twist.linear.x * sin(deltaTheta);
+//                     Vector2 velocity_(velocityX, velocityY);
+//                     Agent* newAgent = new Agent(point, velocity_,radius_);
+//                     agentNeighbors_.push_back(newAgent);
+//                     //智能体是可以的
+//                 } else if (isObstacle(model_state)) {
+//                     const geometry_msgs::Pose &pose = model_state.pose;
+//                     const geometry_msgs::Twist &twist = model_state.twist;
+//                     Vector2 position(pose.position.x, pose.position.y);
+//                     double deltaTheta = twist.angular.z * time;
+//                     double velocityX = twist.linear.x * cos(deltaTheta);
+//                     double velocityY = twist.linear.x * sin(deltaTheta);
+//                     Vector2 velocity_(velocityX, velocityY);
+//                     Obstacle* newObstacle = new Obstacle(position, velocity_);
+//                     obstacleNeighbors_.push_back(newObstacle);
+//                 }
+//             }
+//         } else {
+//             ROS_INFO("No other models received.");
+//         }
+//     }
+//     std::vector<Agent*> Neighbor::getAgentNeighbors() const {
+//         return agentNeighbors_;
+//     }
+//     std::vector<Obstacle*> Neighbor::getObstacleNeighbors() const {
+//         return obstacleNeighbors_;
+//     }
 
     
-    bool Neighbor::isAgent(const gazebo_msgs::ModelState& model_state) {
+//     bool Neighbor::isAgent(const gazebo_msgs::ModelState& model_state) {
 
-        return true;
-    }
-    bool Neighbor::isObstacle(const gazebo_msgs::ModelState& model_state) {
-        return true;
-    }
-}
+//         return true;
+//     }
+//     bool Neighbor::isObstacle(const gazebo_msgs::ModelState& model_state) {
+//         return true;
+//     }
+// }

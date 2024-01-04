@@ -23,18 +23,14 @@ namespace RVO
     // 回调函数，处理模型状态信息
     void modelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg);
     std::vector<gazebo_msgs::ModelState> getothermodels() const;
-    std::vector<Vector2> convert_orca_lines_to_polygon(const std::vector<RVO::Line> &orca_lines);
-    std::pair<Vector2, Vector2> get_feasible_velocity_range(const Vector2 &currentPosition,
-                                                            const std::vector<Vector2> &polygonVertices,
-                                                            double maxSpeed,
-                                                            double time);
-    std::pair<std::pair<double, double>, std::pair<double, double>> convert_velocity_range_to_speed_and_angular_range(
-        const std::pair<Vector2, Vector2> &velocityRange, // 线速度范围
-        double theta                                      // 机器人朝向角度
-    );
-
-    std::vector<Vector2> getReachableVelocitiesResult() const;
     double radius_; // 避障半径
+    // struct Obstacle
+    // {
+    //   std::string name;
+    //   geometry_msgs::Pose pose;
+    // };
+
+
   private:
     ros::NodeHandle nh;
     ros::Subscriber model_states_sub_;
@@ -83,6 +79,7 @@ namespace RVO
     ros::Publisher path_pub_;
     std::vector<geometry_msgs::Pose> newposes;
     geometry_msgs::Pose newpose;
+  //  std::vector<Obstacle> obstacles;
   };
 } // namespace RVO
 #endif // MODEL_SUB_PUB_H
