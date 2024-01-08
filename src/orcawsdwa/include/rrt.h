@@ -38,7 +38,7 @@ namespace RVO
     geometry_msgs::Pose goal_pose_;
     geometry_msgs::Pose current_pose_;
     std::vector<MyObstacle1> obstacles;
-    int sample_num_;
+    double sample_num_;
     double step_;
     double size_;
     Node new_node;

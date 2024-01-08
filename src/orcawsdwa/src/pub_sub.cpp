@@ -12,7 +12,8 @@ int main(int argc, char **argv)
     // 从参数服务器中获取相应的参数值
     std::string targetModelName;
     nh.getParam("target_model_name", targetModelName);
-    double twist_linear_x, twist_angular_z, maxSpeed_, neighborDistance_, timeHorizon_, radius_, time,num,max_angular_speed,  max_linear_speed;
+    double twist_linear_x, twist_angular_z, maxSpeed_, neighborDistance_, timeHorizon_, radius_, time, num, max_angular_speed,
+     max_linear_speed,sample_num;
     nh.getParam("target_model/twist_linear_x", twist_linear_x);
     nh.getParam("target_model/twist_angular_z", twist_angular_z);
     nh.getParam("max_speed", maxSpeed_);
@@ -21,6 +22,7 @@ int main(int argc, char **argv)
     nh.getParam("radius_", radius_);
     nh.getParam("time", time);
     nh.getParam("num", num);
+    nh.getParam("sample_num", sample_num);
     nh.param("max_angular_speed", max_angular_speed, 3.0);
     nh.param("max_linear_speed", max_linear_speed, 3.0);
     geometry_msgs::Pose goal_pose;
@@ -36,7 +38,7 @@ int main(int argc, char **argv)
     target_model_state.twist.linear.x = twist_linear_x;
     target_model_state.twist.angular.z = twist_angular_z;
     RVO::ModelSubPub modelSubPub(targetModelName, time, target_model_state, goal_pose,
-                                 maxSpeed_, neighborDistance_, timeHorizon_, radius_,num,max_angular_speed,  max_linear_speed);
+                                 maxSpeed_, neighborDistance_, timeHorizon_, radius_, num, max_angular_speed, max_linear_speed, sample_num);
     ros::Rate rate(20);
     while (ros::ok())
     {

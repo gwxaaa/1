@@ -18,6 +18,7 @@
      <param name="goal_pose_y" type="double" value="$(arg goal_pose_y)" />
      <param name="goal_pose_z" type="double" value="$(arg goal_pose_z)" />
      <param name="num" type="double" value="40" />
+     <param name="sample_num" type="double" value="10" />
      <param name="time" type="double" value="0.1" />
      <param name="max_speed" type="double" value="10.0" />
      <param name="max_angular_speed" type="double" value="7" />
