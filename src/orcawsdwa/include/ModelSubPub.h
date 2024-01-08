@@ -13,7 +13,7 @@
 
 namespace RVO
 {
-
+  class RRT;
   class ModelSubPub
   {
   public:
@@ -29,7 +29,6 @@ namespace RVO
     //   std::string name;
     //   geometry_msgs::Pose pose;
     // };
-
 
   private:
     ros::NodeHandle nh;
@@ -79,7 +78,7 @@ namespace RVO
     ros::Publisher path_pub_;
     std::vector<geometry_msgs::Pose> newposes;
     geometry_msgs::Pose newpose;
-  //  std::vector<Obstacle> obstacles;
+    //  std::vector<Obstacle> obstacles;
   };
 } // namespace RVO
 #endif // MODEL_SUB_PUB_H

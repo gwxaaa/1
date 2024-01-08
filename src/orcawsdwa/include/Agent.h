@@ -34,7 +34,7 @@ namespace RVO
     ~Agent();
     void computeNeighbors(const Neighbor *neighbor);
     Vector2 computeNewVelocity(const Vector2 &agentPosition, const Vector2 &agentVelocity,
-                                      const Vector2 &goalPosition,
+                                      Vector2 &goalPosition,
                                       const std::vector<RVO::Agent *> &agentNeighbors_,
                                       const std::vector<RVO::Obstacle *> &obstacleNeighbors_,
                                       double time);

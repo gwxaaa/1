@@ -12,6 +12,7 @@
 #include "Line.h"
 #include <geometry_msgs/PoseStamped.h>
 #include "nav_msgs/Path.h"
+#include "rrt.h"
 namespace RVO
 {
   ModelSubPub::ModelSubPub(const std::string &modelName, double time, gazebo_msgs::ModelState target_model_state,
@@ -75,11 +76,29 @@ namespace RVO
     double velocityX = agenttwist.linear.x * cos(deltaTheta);
     double velocityY = agenttwist.linear.x * sin(deltaTheta);
     Vector2 agentVelocity(velocityX, velocityY);
-    Vector2 goalPosition(goal_pose.position.x, goal_pose.position.y);
-    double velocityX1 = (goalPosition.x() - agentPosition.x()) * 0.1;
-    double velocityY1 = (goalPosition.y() - agentPosition.y()) * 0.1;
-    Vector2 prefVelocity(velocityX1, velocityY1);
+    // Vector2 goalPosition(goal_pose.position.x, goal_pose.position.y);
+    // double velocityX1 = (goalPosition.x() - agentPosition.x()) * 0.1;
+    // double velocityY1 = (goalPosition.y() - agentPosition.y()) * 0.1;
+    // Vector2 prefVelocity(velocityX1, velocityY1);
+    int sample_num = 100; // 假设样本数为 100
+    double step = 0.5;    // 假设步长为 0.5
+    double size_ = 10.0;  // 假设尺寸为 10.0
+    // 创建 RRT 对象
+    RVO::RRT rrt(other_models_states, agentpose, goal_pose, sample_num, step, size_);
+    // 运行 RRT 算法得到下一个可行的节点
+    RVO::Node next_node = rrt.plan();
+    // 检查是否找到了可行节点
+    if (next_node.id_ != -1)
+    {
+      // 打印找到的节点信息，这里假设 Node 类有合适的打印方法
+      std::cout << "Next feasible node: " << next_node.x_ << ", " << next_node.y_ << std::endl;
+    }
+    else
+    {
+      std::cout << "No feasible node found." << std::endl;
+    }
 
+    Vector2 goalPosition(next_node.x_, next_node.y_);
     //  开始计算ORCA算法
     RVO::Neighbor neighborobject(*this);
     // // 获取计算后的邻居信息
