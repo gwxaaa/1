@@ -17,7 +17,7 @@ namespace RVO
 {
   ModelSubPub::ModelSubPub(const std::string &modelName, double time, gazebo_msgs::ModelState target_model_state,
                            geometry_msgs::Pose goal_pose, double maxSpeed_, double neighborDistance_, double timeHorizon_, double radius_, double num,
-                           double max_linear_speed, double max_angular_speed,double sample_num)
+                           double max_linear_speed, double max_angular_speed, double sample_num,double step, double size_)
       : modelName_(modelName),
         time(time),
         maxSpeed_(maxSpeed_),
@@ -28,7 +28,9 @@ namespace RVO
         target_model_state(target_model_state),
         lastStoredNewVelocity(agentVelocity),
         num(num),
-        sample_num( sample_num),
+        sample_num(sample_num),
+        step(step), 
+        size_(size_),
         max_linear_speed(max_linear_speed),
         max_angular_speed(max_angular_speed),
         newVelocities(1, Vector2(0, 0)),
@@ -52,6 +54,7 @@ namespace RVO
       if (msg->name[i] == target_model_)
       {
         // 存储特定目标模型的信
+        // gazebo_msgs::ModelState target_model_;
         target_model_state.model_name = msg->name[i];
         target_model_state.pose = msg->pose[i];
         target_model_state.twist = msg->twist[i];
@@ -77,28 +80,23 @@ namespace RVO
     double velocityX = agenttwist.linear.x * cos(deltaTheta);
     double velocityY = agenttwist.linear.x * sin(deltaTheta);
     Vector2 agentVelocity(velocityX, velocityY);
-    // Vector2 goalPosition(goal_pose.position.x, goal_pose.position.y);
-    // double velocityX1 = (goalPosition.x() - agentPosition.x()) * 0.1;
-    // double velocityY1 = (goalPosition.y() - agentPosition.y()) * 0.1;
-    // Vector2 prefVelocity(velocityX1, velocityY1);
-    // int sample_num = 100; 
-    double step = 0.15;   
-    double size_ = 8.0;  
+    //Vector2 goalPosition(goal_pose.position.x, goal_pose.position.y);
     // 创建 RRT 对象
-    RVO::RRT rrt(other_models_states, agentpose, goal_pose, sample_num, step, size_);
+ 
+    RVO::RRT rrt(other_models_states, target_model_state.pose, goal_pose, sample_num, step, size_);
     // 运行 RRT 算法得到下一个可行的节点
     RVO::Node next_node = rrt.plan();
     // 检查是否找到了可行节点
-    if (next_node.id_ != -1)
+    if (next_node.id_== -1)
     {
       std::cout << "Next feasible node: " << next_node.x_ << ", " << next_node.y_ << std::endl;
     }
     else
     {
-      std::cout << "No feasible node found." << std::endl;
+      std::cout << "no feasible node found." << std::endl;
     }
-
-    Vector2 goalPosition(next_node.x_, next_node.y_);
+   Vector2 goalPosition(next_node.x_, next_node.y_);
+  
     //  开始计算ORCA算法
     RVO::Neighbor neighborobject(*this);
     // // 获取计算后的邻居信息

@@ -19,7 +19,7 @@ namespace RVO
   public:
     ModelSubPub(const std::string &modelName, double time, gazebo_msgs::ModelState target_model_state, geometry_msgs::Pose goal_pose,
                 double maxSpeed_, double neighborDistance_, double timeHorizon_, double radius_, double num,
-                double max_linear_speed, double max_angular_speed,double sample_num);
+                double max_linear_speed, double max_angular_speed,double sample_num,double step, double size_);
     // 回调函数，处理模型状态信息
     void modelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg);
     std::vector<gazebo_msgs::ModelState> getothermodels() const;
@@ -38,6 +38,8 @@ namespace RVO
     double time;
     double num;
     double sample_num;
+    double step;
+    double size_;
     geometry_msgs::Pose target_model_pose;
     double new_velocity;
     geometry_msgs::Pose agentpose;

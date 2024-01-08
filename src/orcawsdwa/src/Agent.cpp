@@ -208,15 +208,15 @@ namespace RVO
   }
   // void Agent::computeNewVelocity(float timeStep)
   Vector2 Agent::computeNewVelocity(const Vector2 &agentPosition, const Vector2 &agentVelocity,
-                                     Vector2 &goalPosition,
+                                    Vector2 &goalPosition,
                                     const std::vector<RVO::Agent *> &agentNeighbors_,
                                     const std::vector<RVO::Obstacle *> &obstacleNeighbors_,
                                     double time)
   {
     Vector2 position_(agentPosition);
     Vector2 velocity_(agentVelocity);
-    double velocityX1 = (goalPosition.x() - agentPosition.x()) * 0.1;
-    double velocityY1 = (goalPosition.y() - agentPosition.y()) * 0.1;
+    double velocityX1 = (goalPosition.x() - agentPosition.x()) * 0.5;
+    double velocityY1 = (goalPosition.y() - agentPosition.y()) * 0.5;
     Vector2 prefVelocity_(velocityX1, velocityY1);
     orcaLines_.clear();
     const float invTimeHorizonObst = 1.0 / timeHorizonObst_;
@@ -227,7 +227,7 @@ namespace RVO
       const Obstacle *obstacle2 = obstacle1->next_;
       const Vector2 relativePosition1 = obstacle1->point_ - position_;
       const Vector2 relativePosition2 = obstacle2->point_ - position_;
-//区分障碍物这里没有设置。
+      // 区分障碍物这里没有设置。
       /* Check if velocity obstacle of obstacle is already taken care of by
        * previously constructed obstacle ORCA lines. */
       bool alreadyCovered = false;

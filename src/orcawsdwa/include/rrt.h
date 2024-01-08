@@ -27,8 +27,8 @@ namespace RVO
   class RRT
   {
   public:
-    RRT(const std::vector<gazebo_msgs::ModelState> &other_models_states, const geometry_msgs::Pose &current_pose,
-        geometry_msgs::Pose goal_pose, int sample_num, double step, double size);
+    RRT(const std::vector<gazebo_msgs::ModelState> &other_models_states,  geometry_msgs::Pose &current_pose,
+        geometry_msgs::Pose goal_pose, double sample_num, double step, double size_);
 
     Node plan();
 
@@ -38,13 +38,14 @@ namespace RVO
     geometry_msgs::Pose goal_pose_;
     geometry_msgs::Pose current_pose_;
     std::vector<MyObstacle1> obstacles;
-    double sample_num_;
+    double sample_num;
     double step_;
     double size_;
     Node new_node;
+    Node new_node1;
     Node goal_;
     Node generateRandomNode(double size);
-    Node findNearestPoint(std::unordered_map<int, Node> &list, const Node &random_node);
+    Node findNearestPoint(std::unordered_map<int, Node> &list,  Node &random_node);
     bool _isAnyObstacleInPath(const Node &n1, const Node &n2);
     bool checkGoal(const Node &new_node);
     std::vector<MyObstacle1> convertToObstacles(const std::vector<gazebo_msgs::ModelState> &other_models_states);
