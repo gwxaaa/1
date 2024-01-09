@@ -5,7 +5,8 @@
     <arg name="goal_pose_y"  />
     <arg name="/path_topic"   />
     <arg name="/pose_stamped_topic"   />
-
+    <arg name="/visualization_marker"   />
+    <arg name="/visualization_marker_array"   />
     <node name = "$(arg node_name)" pkg = "orcawsdwa" type = "pub_sub" output = "screen">
      <param name="target_model_name" type="string" value="$(arg target_model_name)" />
      <param name="target_model/twist_linear_x" type="double" value="0.5" />
@@ -18,13 +19,15 @@
      <param name="num" type="double" value="100" />
      <param name="time" type="double" value="0.1" />
      <param name="max_speed" type="double" value="10.0" />
-     <param name="sample_num" type="double" value="5000" />
-     <param name="step" type="double" value="0.5" />
-     <param name="size_" type="double" value="8.0" />
+     <param name="sample_num" type="double" value="2000" />
+     <param name="step" type="double" value="1" />
+     <param name="size_" type="double" value="5.0" />
      <param name="max_angular_speed" type="double" value="7" />
      <param name="max_linear_speed" type="double" value="7" />
      <remap from="/pose_stamped_topic" to="$(arg /pose_stamped_topic)" />
      <remap from="/path_topic" to="$(arg /path_topic)" />
+     <remap from="/visualization_marker" to="$(arg /visualization_marker)" />
+     <remap from="/visualization_marker_array" to="$(arg /visualization_marker_array)" />
     </node>
 
 </launch>

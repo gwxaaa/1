@@ -10,7 +10,7 @@
 #include <KinematicModel.h>
 #include "Line.h"
 #include "Vector2.h"
-
+#include <visualization_msgs/Marker.h>
 namespace RVO
 {
   class RRT;
@@ -19,7 +19,7 @@ namespace RVO
   public:
     ModelSubPub(const std::string &modelName, double time, gazebo_msgs::ModelState target_model_state, geometry_msgs::Pose goal_pose,
                 double maxSpeed_, double neighborDistance_, double timeHorizon_, double radius_, double num,
-                double max_linear_speed, double max_angular_speed,double sample_num,double step, double size_);
+                double max_linear_speed, double max_angular_speed, double sample_num, double step, double size_);
     // 回调函数，处理模型状态信息
     void modelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg);
     std::vector<gazebo_msgs::ModelState> getothermodels() const;
@@ -34,6 +34,8 @@ namespace RVO
     ros::NodeHandle nh;
     ros::Subscriber model_states_sub_;
     ros::Publisher model_states_pub_;
+    ros::Publisher node_publisher;
+     ros::Publisher marker_array_pub;
     std::string target_model_; // 用于存储目标模型的名称
     double time;
     double num;
@@ -81,6 +83,8 @@ namespace RVO
     ros::Publisher path_pub_;
     std::vector<geometry_msgs::Pose> newposes;
     geometry_msgs::Pose newpose;
+    geometry_msgs::Point p;
+    // Node new_goal_node;
     //  std::vector<Obstacle> obstacles;
   };
 } // namespace RVO

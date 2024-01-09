@@ -14,12 +14,10 @@ namespace RVO
         sample_num(sample_num), step_(step), size_(size_)
   {
   }
-
-  Node RRT::plan()
+  std::vector<Node> RRT::plan()
   {
-    // path.clear();
-    // expand.clear();
-    // //
+    std::vector<Node> path;
+    path.clear();
     sample_list_.clear();
     double x = current_pose_.position.x;
     double y = current_pose_.position.y;
@@ -28,7 +26,7 @@ namespace RVO
     double g_y = goal_pose_.position.y;
     goal_ = Node(1, g_x, g_y);
     sample_list_.insert(std::make_pair(start_node.id_, start_node));
-    // expand.push_back(start_node);
+   // path.push_back(start_node);
     int iteration = 0;
     while (iteration < sample_num)
     {
@@ -44,51 +42,126 @@ namespace RVO
       }
       if (isSampleNodeInObstacles)
         continue;
-      // if (sample_list_.find(sample_node.id_) != sample_list_.end())
-      //   continue;
-      Node new_node = findNearestPoint(sample_list_, sample_node);
-      std::cout << "new_node " << new_node.id_ << std::endl;
-      if (new_node.id_ == 1)
+      NodePair result = findNearestPoint(sample_list_, sample_node);
+      if (result.random_node.id_ == -1)
+        continue;
+      else
       {
-            sample_list_.insert(std::make_pair(new_node.id_, new_node));
-      }
-      // else
-      // {
-      //   continue;
-      // }
-      std::cout << "1new_node " << new_node.id_ << std::endl;
-      if (checkGoal(new_node))
-      {
-        return new_node;
+        sample_list_.insert(std::make_pair(result.random_node.id_, result.random_node));
+        // 如果不放置这个，那么就会出现节点和这个不同
+        path.push_back(result.nearest_node);
+        path.push_back(result.random_node);
+        if (checkGoal(result.random_node))
+        {
+          // path.push_back(new_node); // Add the goal node to the path
+          // path.push_back(goal_); // 将终点方进来，保证最后可以到达终点位置
+          return path;
+        }
+        else
+        {
+          // 将靠的近一点的节点放进去
+          // if (calculateDistance(result.random_node, goal_) < calculateDistance(path.back(), goal_))
+          // {
+            //   path.pop_back();
+            // sample_list_.insert(std::make_pair(new_node.id_, new_node));
+            // path.push_back(new_node);
+            // return path;
+
+            continue;
+          // }
+        }
       }
       iteration++;
     }
-    std::cout << "4new_node " << new_node.id_ << std::endl;
-    return new_node;
+    return path;
   }
+  // std::vector<Node> RRT::plan()
+  // {
+  //   std::vector<Node> path;
+  //   path.clear();
+  //   sample_list_.clear();
+  //   double x = current_pose_.position.x;
+  //   double y = current_pose_.position.y;
+  //   Node start_node(1, x, y); //
+  //   double g_x = goal_pose_.position.x;
+  //   double g_y = goal_pose_.position.y;
+  //   goal_ = Node(1, g_x, g_y);
+  //   sample_list_.insert(std::make_pair(start_node.id_, start_node));
+  //   path.push_back(start_node);
+  //   int iteration = 0;
+  //   while (iteration < sample_num)
+  //   {
+  //     Node sample_node = generateRandomNode(size_);
+  //     bool isSampleNodeInObstacles = false;
+  //     for (const auto &obstacle : obstacles)
+  //     {
+  //       if (obstacle.pose.position.x == sample_node.x_ && obstacle.pose.position.y == sample_node.y_)
+  //       {
+  //         isSampleNodeInObstacles = true;
+  //         break;
+  //       }
+  //     }
+  //     if (isSampleNodeInObstacles)
+  //       continue;
+  //     Node new_node = findNearestPoint(sample_list_, sample_node);
+  //     if (new_node.id_ == -1)
+  //       continue;
+  //     else
+  //     {
 
-  Node RRT::generateRandomNode(double size)
+  //       if (checkGoal(new_node))
+  //       {
+  //         path.push_back(new_node); // Add the goal node to the path
+  //         path.push_back(goal_);    // 将终点方进来，保证最后可以到达终点位置
+  //         return path;
+  //       }
+  //       else
+  //       {
+  //         // 将靠的近一点的节点放进去
+  //         if (calculateDistance(new_node, goal_) < calculateDistance(path.back(), goal_))
+  //         {
+  //           //   path.pop_back();
+  //           sample_list_.insert(std::make_pair(new_node.id_, new_node));
+  //           path.push_back(new_node);
+  //           // return path;
+  //           continue;
+  //         }
+  //       }
+  //     }
+  //     iteration++;
+  //   }
+  //   return path;
+  // }
+
+  Node RRT::generateRandomNode(double size_)
   {
     Node random_node;
-    double min_val = -std::abs(size);
-    double max_val = std::abs(size);
+    double min_val = -std::abs(size_);
+    double max_val = std::abs(size_);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<double> x_dist(min_val, max_val);
     std::uniform_real_distribution<double> y_dist(min_val, max_val);
-    random_node.id_ = 1;
+    std::uniform_int_distribution<int> distr(1, std::numeric_limits<int>::max()); // 1到INT_MAX之间的随机整数
+    random_node.id_ = distr(gen);
     random_node.x_ = x_dist(gen);
     random_node.y_ = y_dist(gen);
     return random_node;
   }
 
-  Node RRT::findNearestPoint(std::unordered_map<int, Node> &list, Node &random_node)
+  NodePair RRT::findNearestPoint(std::unordered_map<int, Node> &sample_list_, Node &random_node)
   {
     Node nearest_node;
     double min_dist = std::numeric_limits<double>::max();
     bool isNearestInvalid = false;
+
+    // Node RRT::findNearestPoint(std::unordered_map<int, Node> &sample_list_, Node &random_node)
+    // {
+    //   Node nearest_node;
+    //   double min_dist = std::numeric_limits<double>::max();
+    //   bool isNearestInvalid = false;
     // std::cout << "Sample Node Coordinate: (" << random_node.x_ << ", " << random_node.y_ << ")" << std::endl;
-    for (const auto &point : list)
+    for (const auto &point : sample_list_)
     {
       double new_dist = calculateDistance(point.second, random_node);
       if (new_dist < min_dist)
@@ -96,35 +169,29 @@ namespace RVO
         min_dist = new_dist;
         nearest_node = point.second;
         nearest_node.id_ = 1;
-        isNearestInvalid = (nearest_node.id_ == -1);
       }
     }
-    // 找到最近的节点，如果节点在步长以内，就不需要修改，如果在步长以外，那么就需要修改最近点
-    if (min_dist > step_)
-    {
-      double theta = calculateAngle(random_node, nearest_node);
-      random_node.x_ = nearest_node.x_ + (step_ * cos(theta));
-      random_node.y_ = nearest_node.y_ + (step_ * sin(theta));
-      random_node.id_ = 1;
-    }
-    // if (_isAnyObstacleInPath(random_node, nearest_node))
-    //   random_node.id_ = -1;
-    // isNearestInvalid = true;
-    if (isNearestInvalid)
-    {
-      std::cout << "最近节点为无效节点: ID -1, 坐标 (x, y): (" << nearest_node.x_ << ", " << nearest_node.y_ << ")" << std::endl;
-      std::cout << "最近生成采样点: ID -1, 坐标 (x, y): (" << random_node.x_ << ", " << random_node.y_ << ")" << std::endl;
-    }
-    else
-    {
-      std::cout << "最近节点为有效节点: ID " << nearest_node.id_ << ", 坐标 (x, y): (" << nearest_node.x_ << ", " << nearest_node.y_ << ")" << std::endl;
-    }
-    return random_node;
+    // // 找到最近的节点，如果节点在步长以内，就不需要修改，如果在步长以外，那么就需要修改最近点
+    // if (min_dist > step_)
+    // {
+    //   double theta = calculateAngle(random_node, nearest_node);
+    //   random_node.x_ = nearest_node.x_ + (step_ * cos(theta));
+    //   random_node.y_ = nearest_node.y_ + (step_ * sin(theta));
+    //   random_node.id_ = 1;
+    // }
+    if (_isAnyObstacleInPath(random_node, nearest_node))
+      random_node.id_ = -1;
+
+    NodePair result;
+    result.random_node = random_node;
+    result.nearest_node = nearest_node;
+
+    return result;
   }
 
   bool RRT::_isAnyObstacleInPath(const Node &n1, const Node &n2)
   {
-    double dist_threshold = 0.1;
+    double dist_threshold = 0.3;
     double x1 = n1.x_;
     double y1 = n1.y_;
     double x2 = n2.x_;
@@ -147,8 +214,9 @@ namespace RVO
     {
       if (!_isAnyObstacleInPath(new_node, goal_))
       {
-        Node goal(1, goal_.x_, goal_.y_);
-        sample_list_.insert(std::make_pair(goal.id_, goal));
+        // Node goal(1, goal_.x_, goal_.y_);
+        // sample_list_.insert(std::make_pair(goal.id_, goal));
+
         return true;
       }
     }

@@ -23,14 +23,17 @@ namespace RVO
     std::string name;
     geometry_msgs::Pose pose;
   };
-
+struct NodePair {
+    Node random_node;
+    Node nearest_node;
+};
   class RRT
   {
   public:
-    RRT(const std::vector<gazebo_msgs::ModelState> &other_models_states,  geometry_msgs::Pose &current_pose,
+    RRT(const std::vector<gazebo_msgs::ModelState> &other_models_states, geometry_msgs::Pose &current_pose,
         geometry_msgs::Pose goal_pose, double sample_num, double step, double size_);
 
-    Node plan();
+    std::vector<Node> plan();
 
   private:
     // 其他私有成员函数和变量
@@ -45,7 +48,8 @@ namespace RVO
     Node new_node1;
     Node goal_;
     Node generateRandomNode(double size);
-    Node findNearestPoint(std::unordered_map<int, Node> &list,  Node &random_node);
+    NodePair findNearestPoint(std::unordered_map<int, Node> &sample_list_, Node &random_node);
+    // Node findNearestPoint(std::unordered_map<int, Node> &list, Node &random_node);
     bool _isAnyObstacleInPath(const Node &n1, const Node &n2);
     bool checkGoal(const Node &new_node);
     std::vector<MyObstacle1> convertToObstacles(const std::vector<gazebo_msgs::ModelState> &other_models_states);
