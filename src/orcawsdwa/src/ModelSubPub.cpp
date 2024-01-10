@@ -15,6 +15,7 @@
 #include "rrt.h"
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
+#include "rrt_backtrace.h"
 namespace RVO
 {
   ModelSubPub::ModelSubPub(const std::string &modelName, double time, gazebo_msgs::ModelState target_model_state,
@@ -92,69 +93,7 @@ namespace RVO
     // 运行 RRT 算法得到下一个可行的节点
     std::vector<Node> returned_path = rrt.plan();
     double number_of_points = returned_path.size();
-
-    // ros::Rate rate(1); // 设置发布频率为每秒1次
-    // visualization_msgs::MarkerArray marker_array_msg;
-    // while (ros::ok())
-    // {
-    //   for (size_t i = 0; i < returned_path.size(); ++i)
-    //   {
-    //     visualization_msgs::Marker marker;
-    //     marker.header.frame_id = "map";
-    //     marker.header.stamp = ros::Time::now();
-    //     marker.ns = "";
-    //     marker.id = i;
-    //     marker.type = visualization_msgs::Marker::SPHERE;
-    //     marker.action = visualization_msgs::Marker::ADD;
-    //     marker.pose.position.x = returned_path[i].x_;
-    //     marker.pose.position.y = returned_path[i].y_;
-    //     marker.pose.position.z = 0;
-    //     marker.pose.orientation.x = 0.0;
-    //     marker.pose.orientation.y = 0.0;
-    //     marker.pose.orientation.z = 0.0;
-    //     marker.pose.orientation.w = 1.0;
-    //     marker.scale.x = 0.07; // Size of the sphere
-    //     marker.scale.y = 0.07;
-    //     marker.scale.z = 0.07;
-    //     marker.color.r = 1.0; // Color: red
-    //     marker.color.g = 0.0;
-    //     marker.color.b = 0.0;
-    //     marker.color.a = 1.0; // Alpha;
-    //     marker_array_msg.markers.push_back(marker);
-    //     marker_array_pub.publish(marker_array_msg);
-    //     rate.sleep(); // 暂停，等待指定的频率
-    //   }
-
-    //   for (size_t i = 0; i < returned_path.size() - 1; i += 2)
-    //   {
-    //     visualization_msgs::Marker line_marker;
-    //     line_marker.header.frame_id = "map";
-    //     line_marker.header.stamp = ros::Time::now();
-    //     line_marker.ns = "";
-    //     line_marker.id = i;
-    //     line_marker.type = visualization_msgs::Marker::LINE_STRIP;
-    //     line_marker.action = visualization_msgs::Marker::ADD;
-    //     line_marker.pose.orientation.w = 1.0;
-    //     line_marker.scale.x = 0.03; // Line width
-    //     line_marker.color.r = 1.0;  // Color: red
-    //     line_marker.color.g = 0.0;
-    //     line_marker.color.b = 1.0;
-    //     line_marker.color.a = 1.0; // Alpha
-
-    //     geometry_msgs::Point start_point, end_point;
-    //     start_point.x = returned_path[i].x_;
-    //     start_point.y = returned_path[i].y_;
-    //     start_point.z = 0;
-    //     end_point.x = returned_path[i + 1].x_;
-    //     end_point.y = returned_path[i + 1].y_;
-    //     end_point.z = 0;
-    //     line_marker.points.push_back(start_point);
-    //     line_marker.points.push_back(end_point);
-    //     marker_array_msg.markers.push_back(line_marker);
-    //     marker_array_pub.publish(marker_array_msg);
-    //     rate.sleep(); // 暂停，等待指定的频率
-    //   }
-    // }
+    
     ros::Rate rate(3);
     visualization_msgs::MarkerArray marker_array_msg;
     for (int i = 0; i < number_of_points - 1; i += 2)
@@ -214,6 +153,7 @@ namespace RVO
         rate.sleep(); // 暂停，等待指定的频率
       }
     }
+    // 将起点和终点展示
     visualization_msgs::Marker first_marker;
     first_marker.header.frame_id = "map";
     first_marker.header.stamp = ros::Time::now();
@@ -236,7 +176,6 @@ namespace RVO
     first_marker.color.b = 0.0;
     first_marker.color.a = 1.0;
     marker_array_msg.markers.push_back(first_marker);
-
     visualization_msgs::Marker last_marker;
     last_marker.header.frame_id = "map";
     last_marker.header.stamp = ros::Time::now();
@@ -260,36 +199,59 @@ namespace RVO
     last_marker.color.a = 1.0;
     marker_array_msg.markers.push_back(last_marker);
     marker_array_pub.publish(marker_array_msg);
-    //   visualization_msgs::MarkerArray marker_array_msg;
-    //   double number_of_points = returned_path.size();
-    //   for (int i = 0; i < number_of_points; ++i)
-    //   {
-    //     visualization_msgs::Marker marker;
-    //     marker.header.frame_id = "map";
-    //     marker.header.stamp = ros::Time::now();
-    //     marker.ns = "";
-    //     marker.id = i;
-    //     marker.type = visualization_msgs::Marker::SPHERE;
-    //     marker.action = visualization_msgs::Marker::ADD;
-    //     marker.pose.position.x = returned_path[i].x_;
-    //     marker.pose.position.y = returned_path[i].y_;
-    //     marker.pose.position.z = 0;
-    //     marker.pose.orientation.x = 0.0;
-    //     marker.pose.orientation.y = 0.0;
-    //     marker.pose.orientation.z = 0.0;
-    //     marker.pose.orientation.w = 1.0;
-    //     marker.scale.x = 0.05; // Size of the sphere
-    //     marker.scale.y = 0.05;
-    //     marker.scale.z = 0.05;
-    //     marker.color.r = 1.0; // Color: red
-    //     marker.color.g = 0.0;
-    //     marker.color.b = 0.0;
-    //     marker.color.a = 1.0; // Alpha
-    //     marker_array_msg.markers.push_back(marker);
-    //   }
-    // //  visualization_msgs::MarkerArray marker_array_msg;
-    //   // double number_of_points = returned_path.size();
-    //   for (int i = 0; i < number_of_points - 1; i += 2)
+
+    std::cout << "returned_path.size" << returned_path.size() << std::endl;
+    for (const auto &node : returned_path)
+    {
+      std::cout << "Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
+    }
+    std::vector<RVO::Node1> returned_path1;
+    for (const auto &node : returned_path)
+    {
+      RVO::Node1 node1(node.id_, node.x_, node.y_);
+      returned_path1.push_back(node1);
+    }
+
+    std::vector<RVO::NodeWithParent> nodes_with_parent = addParentInfoToNodes(returned_path1); // 使用正确的返回节点信息类型
+    int goal_id_ = -2;                         
+    std::vector<RVO::Node1> path = backtracePath(nodes_with_parent, goal_id_); // 确保参数类型正确
+    double number_of_points1 = path.size();
+
+    for (const auto &node : path)
+    {
+      std::cout << "111Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
+    }
+
+    // ros::Rate rate(3);
+    // visualization_msgs::MarkerArray marker_array_msg;
+    // for (int i = 0; i < number_of_points1 - 1; ++i)
+    // {
+    //   visualization_msgs::Marker marker;
+    //   marker.header.frame_id = "map";
+    //   marker.header.stamp = ros::Time::now();
+    //   marker.ns = "";
+    //   marker.id = i;
+    //   marker.type = visualization_msgs::Marker::SPHERE;
+    //   marker.action = visualization_msgs::Marker::ADD;
+    //   marker.pose.position.x = path[i].x_;
+    //   marker.pose.position.y = path[i].y_;
+    //   marker.pose.position.z = 0;
+    //   marker.pose.orientation.x = 0.0;
+    //   marker.pose.orientation.y = 0.0;
+    //   marker.pose.orientation.z = 0.0;
+    //   marker.pose.orientation.w = 1.0;
+    //   marker.scale.x = 0.07; // Size of the sphere
+    //   marker.scale.y = 0.07;
+    //   marker.scale.z = 0.07;
+    //   marker.color.r = 1.0; // Color: red
+    //   marker.color.g = 1.0;
+    //   marker.color.b = 1.0;
+    //   marker.color.a = 1.0; // Alpha
+    //   marker_array_msg.markers.push_back(marker);
+    //   marker_array_pub.publish(marker_array_msg);
+    //   rate.sleep(); // 暂停，等待指定的频率
+
+    //   if (i < number_of_points1 - 2)
     //   {
     //     visualization_msgs::Marker marker;
     //     marker.header.frame_id = "map";
@@ -301,46 +263,24 @@ namespace RVO
     //     marker.pose.orientation.w = 1.0;
     //     marker.scale.x = 0.03; // Line width
     //     marker.color.r = 1.0;  // Color: red
-    //     marker.color.g = 0.0;
+    //     marker.color.g = 1.0;
     //     marker.color.b = 1.0;
     //     marker.color.a = 1.0; // Alpha
 
     //     geometry_msgs::Point start_point, end_point;
-    //     start_point.x = returned_path[i].x_;
-    //     start_point.y = returned_path[i].y_;
+    //     start_point.x = path[i].x_;
+    //     start_point.y = path[i].y_;
     //     start_point.z = 0;
-    //     end_point.x = returned_path[i + 1].x_;
-    //     end_point.y = returned_path[i + 1].y_;
+    //     end_point.x = path[i + 1].x_;
+    //     end_point.y = path[i + 1].y_;
     //     end_point.z = 0;
     //     marker.points.push_back(start_point);
     //     marker.points.push_back(end_point);
     //     marker_array_msg.markers.push_back(marker);
     //     marker_array_pub.publish(marker_array_msg);
-    //    ros::Duration(0.1).sleep();
+    //     rate.sleep(); // 暂停，等待指定的频率
     //   }
-    // Publish the MarkerArray message
-
-    std::cout << "returned_path.size" << returned_path.size() << std::endl;
-    for (const auto &node : returned_path)
-    {
-      std::cout << "Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
-    }
-    // if (returned_path.size() > 1)
-    // {
-    //   Node new_goal_node = returned_path[1]; // 获取路径的第二个节点作为新的目标节点
-    //                                          // 在这里使用新的目标节点 new_goal_node 进行你的下一步操作
     // }
-    // RVO::Node next_node = rrt.plan();
-    // 检查是否找到了可行节点
-    //   if (next_node.id_== -1)
-    //   {
-    //     std::cout << "Next feasible node: " << next_node.x_ << ", " << next_node.y_ << std::endl;
-    //   }
-    //   else
-    //   {
-    //     std::cout << "no feasible node found." << std::endl;
-    //   }
-
     //  开始计算ORCA算法
     // RVO::Neighbor neighborobject(*this);
     // // // 获取计算后的邻居信息

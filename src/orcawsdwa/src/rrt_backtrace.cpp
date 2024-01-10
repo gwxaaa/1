@@ -1,25 +1,43 @@
-
 #include "rrt_backtrace.h"
 #include <algorithm>
 namespace RVO
 {
+std::vector<NodeWithParent> addParentInfoToNodes( std::vector<Node1>& returned_path) {
+    std::vector<NodeWithParent> nodes_with_parent;
+    //在设置的节点中，两两一组，也就是0和1，2和3，1和2之间没有关系
+    nodes_with_parent.emplace_back(returned_path[0], Node1()); // 初始节点没有父节点
+    for (size_t i = 1; i < returned_path.size()-1; i += 2) {
+        nodes_with_parent.emplace_back(returned_path[i], returned_path[i - 1]);
+      //  nodes_with_parent.emplace_back(returned_path[i + 1], returned_path[i]);
+    }
+    return nodes_with_parent;
+}
+//从末端开始回溯，将点和点之间进行连接----根据父节点的关系
+std::vector<Node1> backtracePath( std::vector<NodeWithParent>& nodes_with_parent, int goal_id_) {
 
+    std::vector<Node1> path;
+    int current_id_ = goal_id_;
+    //因为在前面的设置过程中，将-1设置为了节点会碰撞，所以现在的信息就是如果父节点为-1，那么就是空的
+    //将起点设置为这个值，作为找到起点，循环结束
+    while (current_id_ != -1) {
+       // 找寻当前节点是否存在，然后找到后就找寻父节点
+        const Node1& current_node = std::find_if(nodes_with_parent.begin(), nodes_with_parent.end(),
+                                                [current_id_](const NodeWithParent& node) { return node.node.id_ == current_id_; })->node;
 
-std::vector<Node> backtracePath(const std::vector<Node>& returned_path, const std::unordered_map<int, int>& parent_map, int goal_id) {
-    std::vector<Node> path;
-    int current_id = goal_id; // 从目标节点开始回溯
+        path.push_back(current_node);
 
-    while (current_id != -1) {
-        const Node& current_node = returned_path[current_id]; // 获取当前节点信息
-        path.push_back(current_node); // 将当前节点添加到路径中
-        auto it = parent_map.find(current_id); // 查找当前节点的父节点索引
-        if (it != parent_map.end()) {
-            current_id = it->second; // 更新为父节点索引，继续向前回溯
+        auto it = std::find_if(nodes_with_parent.begin(), nodes_with_parent.end(),
+                               [current_id_](const NodeWithParent& node) { return node.node.id_ == current_id_; });
+
+        if (it != nodes_with_parent.end()) {
+            current_id_ = it->parent.id_;
         } else {
-            break; // 没有找到父节点索引，到达起始节点，结束回溯
+            break;
         }
     }
-    std::reverse(path.begin(), path.end()); // 反转路径，使其从起始节点到目标节点
-    return path; // 返回回溯得到的路径
+
+    std::reverse(path.begin(), path.end());
+    return path;
 }
+
 }
