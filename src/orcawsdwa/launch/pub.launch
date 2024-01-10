@@ -19,7 +19,7 @@
      <param name="num" type="double" value="100" />
      <param name="time" type="double" value="0.1" />
      <param name="max_speed" type="double" value="10.0" />
-     <param name="sample_num" type="double" value="2000" />
+     <param name="sample_num" type="double" value="900" />
      <param name="step" type="double" value="1" />
      <param name="size_" type="double" value="5.0" />
      <param name="max_angular_speed" type="double" value="7" />
