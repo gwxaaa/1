@@ -93,8 +93,8 @@ namespace RVO
     // 运行 RRT 算法得到下一个可行的节点
     std::vector<Node> returned_path = rrt.plan();
     double number_of_points = returned_path.size();
-    
-    ros::Rate rate(3);
+
+    ros::Rate rate(100);
     visualization_msgs::MarkerArray marker_array_msg;
     for (int i = 0; i < number_of_points - 1; i += 2)
     {
@@ -205,16 +205,40 @@ namespace RVO
     {
       std::cout << "Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
     }
-    std::vector<RVO::Node1> returned_path1;
+
+    // std::vector<RVO::Node> returned_path;
+    std::vector<RVO::RRTBacktrace::Node1> returned_path1;
+
+    // 遍历原始路径，逐个转换并添加到新的路径中
     for (const auto &node : returned_path)
     {
-      RVO::Node1 node1(node.id_, node.x_, node.y_);
+      RVO::RRTBacktrace::Node1 node1(node.id_, node.x_, node.y_);
       returned_path1.push_back(node1);
     }
 
-    std::vector<RVO::NodeWithParent> nodes_with_parent = addParentInfoToNodes(returned_path1); // 使用正确的返回节点信息类型
-    int goal_id_ = -2;                         
-    std::vector<RVO::Node1> path = backtracePath(nodes_with_parent, goal_id_); // 确保参数类型正确
+    // 现在，converted_path 就是转换后的路径，类型为 std::vector<RVO::RRTBacktrace::Node1>
+    RVO::RRTBacktrace rrtBacktrace;
+    // 假设有一个返回的路径为 returned_path，类型为 std::vector<RVO::Node1>
+    // 调用 addParentInfoToNodes 函数
+    std::vector<RVO::RRTBacktrace::NodeWithParent> nodes_with_parent = rrtBacktrace.addParentInfoToNodes(returned_path1);
+
+    // 假设有一个 goal_id_
+    int goal_id_ = -2;
+
+    // 调用 backtracePath 函数
+    std::vector<RVO::RRTBacktrace::Node1> path = rrtBacktrace.backtracePath(nodes_with_parent, goal_id_, returned_path1);
+
+    // // 这里是因为两个节点的类型不同，在这里进行一个转换
+    // std::vector<RVO::Node1> returned_path1;
+    // for (const auto &node : returned_path)
+    // {
+    //   RVO::Node1 node1(node.id_, node.x_, node.y_);
+    //   returned_path1.push_back(node1);
+    // }
+
+    // std::vector<RVO::NodeWithParent> nodes_with_parent = addParentInfoToNodes(returned_path1); // 使用正确的返回节点信息类型
+    // int goal_id_ = -2;
+    // std::vector<RVO::Node1> path = backtracePath(nodes_with_parent, goal_id_, returned_path1); // 确保参数类型正确
     double number_of_points1 = path.size();
 
     for (const auto &node : path)
@@ -222,66 +246,39 @@ namespace RVO
       std::cout << "111Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
     }
 
-    // ros::Rate rate(3);
-    // visualization_msgs::MarkerArray marker_array_msg;
-    // for (int i = 0; i < number_of_points1 - 1; ++i)
-    // {
-    //   visualization_msgs::Marker marker;
-    //   marker.header.frame_id = "map";
-    //   marker.header.stamp = ros::Time::now();
-    //   marker.ns = "";
-    //   marker.id = i;
-    //   marker.type = visualization_msgs::Marker::SPHERE;
-    //   marker.action = visualization_msgs::Marker::ADD;
-    //   marker.pose.position.x = path[i].x_;
-    //   marker.pose.position.y = path[i].y_;
-    //   marker.pose.position.z = 0;
-    //   marker.pose.orientation.x = 0.0;
-    //   marker.pose.orientation.y = 0.0;
-    //   marker.pose.orientation.z = 0.0;
-    //   marker.pose.orientation.w = 1.0;
-    //   marker.scale.x = 0.07; // Size of the sphere
-    //   marker.scale.y = 0.07;
-    //   marker.scale.z = 0.07;
-    //   marker.color.r = 1.0; // Color: red
-    //   marker.color.g = 1.0;
-    //   marker.color.b = 1.0;
-    //   marker.color.a = 1.0; // Alpha
-    //   marker_array_msg.markers.push_back(marker);
-    //   marker_array_pub.publish(marker_array_msg);
-    //   rate.sleep(); // 暂停，等待指定的频率
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "map";
+    marker.header.stamp = ros::Time::now();
+    marker.ns = "";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::LINE_STRIP;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = 0.08; // Line width
+    marker.color.r = 0.0;  // Color: red
+    marker.color.g = 1.0;
+    marker.color.b = 1.0;
+    marker.color.a = 1.0; // Alpha
+    for (int i = 0; i < number_of_points1; ++i)
+    {
+      geometry_msgs::Point point;
+      point.x = path[i].x_;
+      point.y = path[i].y_;
+      point.z = 0;
+      marker.points.push_back(point);
+    }
 
-    //   if (i < number_of_points1 - 2)
-    //   {
-    //     visualization_msgs::Marker marker;
-    //     marker.header.frame_id = "map";
-    //     marker.header.stamp = ros::Time::now();
-    //     marker.ns = "";
-    //     marker.id = i;
-    //     marker.type = visualization_msgs::Marker::LINE_STRIP;
-    //     marker.action = visualization_msgs::Marker::ADD;
-    //     marker.pose.orientation.w = 1.0;
-    //     marker.scale.x = 0.03; // Line width
-    //     marker.color.r = 1.0;  // Color: red
-    //     marker.color.g = 1.0;
-    //     marker.color.b = 1.0;
-    //     marker.color.a = 1.0; // Alpha
+    marker_array_msg.markers.push_back(marker);
+    marker_array_pub.publish(marker_array_msg);
+    rate.sleep(); // 暂停，等待指定的频率
 
-    //     geometry_msgs::Point start_point, end_point;
-    //     start_point.x = path[i].x_;
-    //     start_point.y = path[i].y_;
-    //     start_point.z = 0;
-    //     end_point.x = path[i + 1].x_;
-    //     end_point.y = path[i + 1].y_;
-    //     end_point.z = 0;
-    //     marker.points.push_back(start_point);
-    //     marker.points.push_back(end_point);
-    //     marker_array_msg.markers.push_back(marker);
-    //     marker_array_pub.publish(marker_array_msg);
-    //     rate.sleep(); // 暂停，等待指定的频率
-    //   }
-    // }
-    //  开始计算ORCA算法
+    Vector2 goalPosition(path[1].x_, path[1].y_);
+    std::cout << "s goalPosition " << goalPosition.x() << ",  goalPosition " << goalPosition.y() << std::endl;
+    // 对于这个点，将其进行修正，这里调整出来的点传入，进行点的修改
+    // 将节点沿连接线方向移动一定比例
+    // 对于调整的比例需要设置
+
+    // //  开始计算ORCA算法
     // RVO::Neighbor neighborobject(*this);
     // // // 获取计算后的邻居信息
     // std::vector<RVO::Agent *> agentNeighbors_ = neighborobject.getAgentNeighbors();

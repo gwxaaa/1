@@ -16,7 +16,7 @@
      <param name="radius_" type="double" value="0.38" />  
      <param name="goal_pose_x" type="double" value="$(arg goal_pose_x)" />
      <param name="goal_pose_y" type="double" value="$(arg goal_pose_y)" />
-     <param name="num" type="double" value="100" />
+     <param name="num" type="double" value="101" />
      <param name="time" type="double" value="0.1" />
      <param name="max_speed" type="double" value="10.0" />
      <param name="sample_num" type="double" value="900" />

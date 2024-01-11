@@ -48,7 +48,6 @@ int main(int argc, char **argv)
         ROS_INFO("Target model name: %s", targetModelName.c_str());
         ros::spinOnce();
         rate.sleep();
-
     }
 
     return 0;

@@ -82,21 +82,21 @@ namespace RVO
   Node RRT::generateRandomNode(double size_)
   {
     Node random_node;
-    double min_val = -std::abs(size_);
-    double max_val = std::abs(size_);
+    // 将代码修改，求解起点和终点之间的高斯分布随机点
     std::random_device rd;
     std::mt19937 gen(rd());
     double center_x = (current_pose_.position.x + goal_pose_.position.x) / 2.0;
     double center_y = (current_pose_.position.y + goal_pose_.position.y) / 2.0;
-    std::normal_distribution<double> gauss_x(center_x, 1);
-    std::normal_distribution<double> gauss_y(center_y, 1);
+    std::normal_distribution<double> gauss_x(center_x, 0.7);
+    std::normal_distribution<double> gauss_y(center_y, 0.7);
     random_node.x_ = gauss_x(gen);
     random_node.y_ = gauss_y(gen);
+    // double min_val = -std::abs(size_);
+    // double max_val = std::abs(size_);
     // std::uniform_real_distribution<double> x_dist(min_val, max_val);
     // std::uniform_real_distribution<double> y_dist(min_val, max_val);
     // random_node.x_ = x_dist(gen);
     // random_node.y_ = y_dist(gen);
-
     std::uniform_int_distribution<int> distr(1, std::numeric_limits<int>::max()); // 1到INT_MAX之间的随机整数
     random_node.id_ = distr(gen);
 
