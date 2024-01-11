@@ -10,8 +10,8 @@
       <arg name="/path_topic"  value="/path_topic41" />
       <arg name="/visualization_marker"  value="/visualization_marker41" />
       <arg name="/visualization_marker_array"  value="/visualization_marker_array41" />
-    </include> -->
-<!-- 
+    </include>
+
     <include file="src/orcawsdwa/launch/pub.launch">
      <arg name="node_name" value="pub_sub42" />
      <arg name="target_model_name"  value="model8.1_1" />
@@ -65,9 +65,9 @@
      <arg name="/path_topic"  value="/path_topic46" />
      <arg name="/visualization_marker"  value="/visualization_marker46" />
      <arg name="/visualization_marker_array"  value="/visualization_marker_array46" />
-    </include>
+    </include> -->
 
-    <include file="src/orcawsdwa/launch/pub.launch">
+    <!-- <include file="src/orcawsdwa/launch/pub.launch">
      <arg name="node_name" value="pub_sub47" />
      <arg name="target_model_name"  value="model8.4_0" />
      <arg name="goal_pose_x"  value="4" />

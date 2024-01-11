@@ -19,9 +19,10 @@
      <param name="num" type="double" value="101" />
      <param name="time" type="double" value="0.1" />
      <param name="max_speed" type="double" value="10.0" />
-     <param name="sample_num" type="double" value="900" />
+     <param name="sample_num" type="double" value="500" />
      <param name="step" type="double" value="1" />
      <param name="size_" type="double" value="5.0" />
+     <param name="ratio" type="double" value="0.5" />
      <param name="max_angular_speed" type="double" value="7" />
      <param name="max_linear_speed" type="double" value="7" />
      <remap from="/pose_stamped_topic" to="$(arg /pose_stamped_topic)" />

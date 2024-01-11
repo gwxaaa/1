@@ -1,5 +1,5 @@
-#ifndef MODEL_SUB_PUB_H
-#define MODEL_SUB_PUB_H
+#ifndef RRT_MAIN_H
+#define RRT_MAIN_H
 #include "ros/ros.h"
 #include "gazebo_msgs/ModelStates.h"
 #include "gazebo_msgs/SetModelState.h"
@@ -11,24 +11,22 @@
 #include "Line.h"
 #include "Vector2.h"
 #include <visualization_msgs/Marker.h>
+#include "rrt_backtrace.h"
 namespace RVO
 {
   class RRT;
-  class ModelSubPub
+  class RRTmain
   {
   public:
-    ModelSubPub(const std::string &modelName, double time, gazebo_msgs::ModelState target_model_state, geometry_msgs::Pose goal_pose,
-                double maxSpeed_, double neighborDistance_, double timeHorizon_, double radius_, double num,
-                double max_linear_speed, double max_angular_speed, double sample_num, double step, double size_, double ratio);
+    RRTmain(const std::string &modelName, double time, gazebo_msgs::ModelState target_model_state, geometry_msgs::Pose goal_pose,
+            double sample_num, double step, double size_, double ratio);
     // 回调函数，处理模型状态信息
-    void modelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg);
-    std::vector<gazebo_msgs::ModelState> getothermodels() const;
+    void modelStatesCallback1(const gazebo_msgs::ModelStates::ConstPtr &msg);
+    std::vector<gazebo_msgs::ModelState> getothermodels1() const;
+    std::vector<geometry_msgs::Pose> getFinalPathPoses() const;
     double radius_; // 避障半径
-    // struct Obstacle
-    // {
-    //   std::string name;
-    //   geometry_msgs::Pose pose;
-    // };
+    std::vector<RVO::RRTBacktrace::Node1> adjusted_path;
+
 
   private:
     ros::NodeHandle nh;
@@ -51,13 +49,6 @@ namespace RVO
     std::vector<gazebo_msgs::ModelState> other_models_states;
     std::string modelName_;
     double time_;
-    double targetModelSpeed_;
-    double goalModelSpeed_;
-    double maxSpeed_;
-    double neighborDistance_;
-    double timeHorizon_;
-    std::vector<Agent *> agentNeighbors_;
-    std::vector<Agent *> obstacleNeighbors_;
     gazebo_msgs::ModelState target_model_state;
     Vector2 agentPosition;
     Vector2 agentVelocity;
@@ -65,21 +56,8 @@ namespace RVO
     geometry_msgs::Pose new_pose;
     geometry_msgs::Twist new_twist;
     geometry_msgs::Pose final_pose;
-    Vector2 lastvelocity;
-    Vector2 prevelocity;
-    Vector2 lastStoredNewVelocity;
-    std::vector<Vector2> newVelocities;
-    double max_linear_speed;
-    double max_angular_speed; // 用于存储新速度的数组
-    double min_linear_speed;
-    double min_angular_speed;
     std::vector<geometry_msgs::Pose> obstacle_poses;
-    std::vector<Vector2> &polygonVertices;
-    std::vector<RVO::Line> orcaLines;
     Vector2 currentPosition;
-    Vector2 minVelocity;
-    Vector2 maxVelocity;
-    std::vector<Vector2> reachableVelocitiesResult;
     ros::Publisher pose_stamped_pub_;
     ros::Publisher path_pub_;
     std::vector<geometry_msgs::Pose> newposes;
@@ -87,6 +65,7 @@ namespace RVO
     geometry_msgs::Point p;
     // Node new_goal_node;
     //  std::vector<Obstacle> obstacles;
+    bool flag;
   };
 } // namespace RVO
-#endif // MODEL_SUB_PUB_H
+#endif // RRT_MAIN_H

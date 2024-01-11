@@ -86,8 +86,8 @@ namespace RVO
     std::mt19937 gen(rd());
     double center_x = (current_pose_.position.x + goal_pose_.position.x) / 2.0;
     double center_y = (current_pose_.position.y + goal_pose_.position.y) / 2.0;
-    std::normal_distribution<double> gauss_x(center_x, 0.7);
-    std::normal_distribution<double> gauss_y(center_y, 0.7);
+    std::normal_distribution<double> gauss_x(center_x, 1);
+    std::normal_distribution<double> gauss_y(center_y, 1);
     random_node.x_ = gauss_x(gen);
     random_node.y_ = gauss_y(gen);
     // double min_val = -std::abs(size_);

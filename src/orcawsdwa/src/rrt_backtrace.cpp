@@ -87,7 +87,9 @@ namespace RVO
             double newX = middle.x_ + moveX;
             double newY = middle.y_ + moveY;
             Node1 adjustedNode(1, newX, newY);
-
+            std::cout << "Projection Length: " << projectionLength << std::endl;
+            std::cout << "Move Distance: " << sqrt(moveX * moveX + moveY * moveY) << std::endl;
+            std::cout << " ratio: " << ratio << std::endl;
             return adjustedNode;
         }
         else
@@ -116,9 +118,10 @@ namespace RVO
         for (size_t i = 1; i < path.size() - 1; ++i)
         {
             // 移动第二个节点
-            Node1 adjustedNode = moveAlongLine(path[i - 1], path[i], path[i + 1], 0.3);
-            processedNodes.push_back(adjustedNode); // 调整后的节点
-                                                    //  path[i] = adjustedNode;
+            Node1 adjustedNode = moveAlongLine(path[i - 1], path[i], path[i + 1], ratio);
+            processedNodes.push_back(adjustedNode);
+            // 调整后的节点是否要放入path,使得下一个调整结果是根据这个实现的
+            //  path[i] = adjustedNode;
         }
         // 添加最后一个节点
         processedNodes.push_back(path.back());
