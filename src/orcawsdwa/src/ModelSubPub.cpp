@@ -47,7 +47,7 @@ namespace RVO
     pose_stamped_pub_ = nh.advertise<geometry_msgs::PoseStamped>("/pose_stamped_topic", 10); // 新增的发布器
     path_pub_ = nh.advertise<nav_msgs::Path>("/path_topic", 10);
     node_publisher = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
-    marker_array_pub = nh.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 10);
+    marker_array_pub = nh.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100);
   }
   // 回调函数，处理模型状态信息
   void ModelSubPub::modelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg)
@@ -94,7 +94,7 @@ namespace RVO
     std::vector<Node> returned_path = rrt.plan();
     double number_of_points = returned_path.size();
 
-    ros::Rate rate(100);
+    ros::Rate rate(10);
     visualization_msgs::MarkerArray marker_array_msg;
     for (int i = 0; i < number_of_points - 1; i += 2)
     {
@@ -121,7 +121,7 @@ namespace RVO
       marker.color.a = 1.0; // Alpha
       marker_array_msg.markers.push_back(marker);
       marker_array_pub.publish(marker_array_msg);
-      rate.sleep(); // 暂停，等待指定的频率
+    //  rate.sleep(); // 暂停，等待指定的频率
 
       if (i < number_of_points - 1)
       {
@@ -150,14 +150,14 @@ namespace RVO
         marker.points.push_back(end_point);
         marker_array_msg.markers.push_back(marker);
         marker_array_pub.publish(marker_array_msg);
-        rate.sleep(); // 暂停，等待指定的频率
+       // rate.sleep(); // 暂停，等待指定的频率
       }
     }
     // 将起点和终点展示
     visualization_msgs::Marker first_marker;
     first_marker.header.frame_id = "map";
     first_marker.header.stamp = ros::Time::now();
-    first_marker.ns = "";
+    first_marker.ns = "point";
     first_marker.id = 1000; // 为第一个点设置一个不同的ID，以便与其他点区分开来
     first_marker.type = visualization_msgs::Marker::SPHERE;
     first_marker.action = visualization_msgs::Marker::ADD;
@@ -179,7 +179,7 @@ namespace RVO
     visualization_msgs::Marker last_marker;
     last_marker.header.frame_id = "map";
     last_marker.header.stamp = ros::Time::now();
-    last_marker.ns = "";
+    last_marker.ns = "line";
     last_marker.id = 1001; // 为最后一个点设置一个不同的ID，以便与其他点区分开来
     last_marker.type = visualization_msgs::Marker::SPHERE;
     last_marker.action = visualization_msgs::Marker::ADD;
@@ -206,153 +206,163 @@ namespace RVO
       std::cout << "Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
     }
 
-    // std::vector<RVO::Node> returned_path;
     std::vector<RVO::RRTBacktrace::Node1> returned_path1;
-
-    // 遍历原始路径，逐个转换并添加到新的路径中
     for (const auto &node : returned_path)
     {
       RVO::RRTBacktrace::Node1 node1(node.id_, node.x_, node.y_);
       returned_path1.push_back(node1);
     }
 
-    // 现在，converted_path 就是转换后的路径，类型为 std::vector<RVO::RRTBacktrace::Node1>
     RVO::RRTBacktrace rrtBacktrace;
-    // 假设有一个返回的路径为 returned_path，类型为 std::vector<RVO::Node1>
-    // 调用 addParentInfoToNodes 函数
     std::vector<RVO::RRTBacktrace::NodeWithParent> nodes_with_parent = rrtBacktrace.addParentInfoToNodes(returned_path1);
-
-    // 假设有一个 goal_id_
     int goal_id_ = -2;
-
     // 调用 backtracePath 函数
     std::vector<RVO::RRTBacktrace::Node1> path = rrtBacktrace.backtracePath(nodes_with_parent, goal_id_, returned_path1);
+     double ratio = 5;
+    std::vector<RVO::RRTBacktrace::Node1> adjusted_path = RVO::RRTBacktrace::processNodes(path,5);
 
-    // // 这里是因为两个节点的类型不同，在这里进行一个转换
-    // std::vector<RVO::Node1> returned_path1;
-    // for (const auto &node : returned_path)
-    // {
-    //   RVO::Node1 node1(node.id_, node.x_, node.y_);
-    //   returned_path1.push_back(node1);
-    // }
-
-    // std::vector<RVO::NodeWithParent> nodes_with_parent = addParentInfoToNodes(returned_path1); // 使用正确的返回节点信息类型
-    // int goal_id_ = -2;
-    // std::vector<RVO::Node1> path = backtracePath(nodes_with_parent, goal_id_, returned_path1); // 确保参数类型正确
     double number_of_points1 = path.size();
 
     for (const auto &node : path)
     {
       std::cout << "111Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
     }
+    double number_of_points2 = adjusted_path.size();
 
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = "map";
-    marker.header.stamp = ros::Time::now();
-    marker.ns = "";
-    marker.id = 0;
-    marker.type = visualization_msgs::Marker::LINE_STRIP;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.orientation.w = 1.0;
-    marker.scale.x = 0.08; // Line width
-    marker.color.r = 0.0;  // Color: red
-    marker.color.g = 1.0;
-    marker.color.b = 1.0;
-    marker.color.a = 1.0; // Alpha
+    for (const auto &node : adjusted_path)
+    {
+      std::cout << "222Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
+    }
+    visualization_msgs::Marker pathmarker;
+    pathmarker.header.frame_id = "map";
+    pathmarker.header.stamp = ros::Time::now();
+    pathmarker.ns = "path";
+    pathmarker.id = 0;
+    pathmarker.type = visualization_msgs::Marker::LINE_STRIP;
+    pathmarker.action = visualization_msgs::Marker::ADD;
+    pathmarker.pose.orientation.w = 1.0;
+    pathmarker.scale.x = 0.08; // Line width
+    pathmarker.color.r = 0.0;  // Color: red
+    pathmarker.color.g = 1.0;
+    pathmarker.color.b = 1.0;
+    pathmarker.color.a = 1.0; // Alpha
     for (int i = 0; i < number_of_points1; ++i)
     {
       geometry_msgs::Point point;
       point.x = path[i].x_;
       point.y = path[i].y_;
       point.z = 0;
+      pathmarker.points.push_back(point);
+    }
+    marker_array_msg.markers.push_back(pathmarker);
+    marker_array_pub.publish(marker_array_msg);
+  //  rate.sleep(); // 暂停，等待指定的频率
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "map";
+    marker.header.stamp = ros::Time::now();
+    marker.ns = "1";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::LINE_STRIP;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = 0.04  ; // Line width
+    marker.color.r = 0.0;   // Color: red
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    marker.color.a = 1.0; // Alpha
+    for (int i = 0; i < number_of_points2; ++i)
+    {
+      geometry_msgs::Point point;
+      point.x = adjusted_path[i].x_;
+      point.y = adjusted_path[i].y_;
+      point.z = 0;
       marker.points.push_back(point);
     }
-
     marker_array_msg.markers.push_back(marker);
     marker_array_pub.publish(marker_array_msg);
-    rate.sleep(); // 暂停，等待指定的频率
+   // rate.sleep(); // 暂停，等待指定的频率
 
-    Vector2 goalPosition(path[1].x_, path[1].y_);
+    Vector2 goalPosition(adjusted_path[1].x_, adjusted_path[1].y_);
     std::cout << "s goalPosition " << goalPosition.x() << ",  goalPosition " << goalPosition.y() << std::endl;
     // 对于这个点，将其进行修正，这里调整出来的点传入，进行点的修改
     // 将节点沿连接线方向移动一定比例
     // 对于调整的比例需要设置
 
-    // //  开始计算ORCA算法
-    // RVO::Neighbor neighborobject(*this);
-    // // // 获取计算后的邻居信息
-    // std::vector<RVO::Agent *> agentNeighbors_ = neighborobject.getAgentNeighbors();
-    // std::vector<RVO::Obstacle *> obstacleNeighbors_ = neighborobject.getObstacleNeighbors();
-    // RVO::Agent agent(agentPosition, agentVelocity, goalPosition, time, maxSpeed_,
-    //                  neighborDistance_, timeHorizon_, other_models_states, radius_);
-    // RVO::Vector2 newVelocity = agent.computeNewVelocity(agentPosition, agentVelocity,
-    //                                                     goalPosition, agentNeighbors_, obstacleNeighbors_, time);
+    //  开始计算ORCA算法
+    RVO::Neighbor neighborobject(*this);
+    // // 获取计算后的邻居信息
+    std::vector<RVO::Agent *> agentNeighbors_ = neighborobject.getAgentNeighbors();
+    std::vector<RVO::Obstacle *> obstacleNeighbors_ = neighborobject.getObstacleNeighbors();
+    RVO::Agent agent(agentPosition, agentVelocity, goalPosition, time, maxSpeed_,
+                     neighborDistance_, timeHorizon_, other_models_states, radius_);
+    RVO::Vector2 newVelocity = agent.computeNewVelocity(agentPosition, agentVelocity,
+                                                        goalPosition, agentNeighbors_, obstacleNeighbors_, time);
 
-    // // 知道速度矢量，将位置计算出来，对位置进行对比。----
-    // if (std::isnan(newVelocity.x()) || std::isnan(newVelocity.y()))
-    // {
-    //   new_pose.position.x = agentPosition.x();
-    //   new_pose.position.y = agentPosition.y();
-    //   std::cout << "New velocity contains NaN. Keeping original position." << std::endl;
-    // }
-    // else
-    // {
-    //   new_pose.position.x = agentPosition.x() + newVelocity.x() * time;
-    //   new_pose.position.y = agentPosition.y() + newVelocity.y() * time;
-    //   std::cout << "Moved to new position: x=" << new_pose.position.x << ", y=" << new_pose.position.y << std::endl;
-    // }
-    // // 这里需要注意，最后朝向和ORCA结果不同，是机器人的朝向。
-    // final_pose = agentpose;
-    // double final_yaw = atan2(
-    //     2.0 * (final_pose.orientation.z * final_pose.orientation.w + final_pose.orientation.x * final_pose.orientation.y),
-    //     1.0 - 2.0 * (final_pose.orientation.y * final_pose.orientation.y +
-    //                  final_pose.orientation.z * final_pose.orientation.z));
-    // double theta1 = atan2(newVelocity.y(), newVelocity.x());
-    // double theta = theta1 - final_yaw;
-    // // double theta = atan2(newVelocity.y(), newVelocity.x());
+    // 知道速度矢量，将位置计算出来，对位置进行对比。----
+    if (std::isnan(newVelocity.x()) || std::isnan(newVelocity.y()))
+    {
+      new_pose.position.x = agentPosition.x();
+      new_pose.position.y = agentPosition.y();
+      std::cout << "New velocity contains NaN. Keeping original position." << std::endl;
+    }
+    else
+    {
+      new_pose.position.x = agentPosition.x() + newVelocity.x() * time;
+      new_pose.position.y = agentPosition.y() + newVelocity.y() * time;
+      std::cout << "Moved to new position: x=" << new_pose.position.x << ", y=" << new_pose.position.y << std::endl;
+    }
+    // 这里需要注意，最后朝向和ORCA结果不同，是机器人的朝向。
+    final_pose = agentpose;
+    double final_yaw = atan2(
+        2.0 * (final_pose.orientation.z * final_pose.orientation.w + final_pose.orientation.x * final_pose.orientation.y),
+        1.0 - 2.0 * (final_pose.orientation.y * final_pose.orientation.y +
+                     final_pose.orientation.z * final_pose.orientation.z));
+    double theta1 = atan2(newVelocity.y(), newVelocity.x());
+    double theta = theta1 - final_yaw;
+    // double theta = atan2(newVelocity.y(), newVelocity.x());
 
-    // RVO::DWAPlanner planner(new_pose, other_models_states, max_linear_speed, max_angular_speed, time, num, agentpose, theta);
-    // // 查找最佳速度，final_pose，最佳分数
-    // const geometry_msgs::Twist &best_twist = planner.FindBestTwist(agentpose);
-    // std::cout << " best_twist.linear.xx=" << best_twist.linear.x << ", y=" << best_twist.angular.z << std::endl;
-    // geometry_msgs::Pose final_pose;
-    // KinematicModel kinematic_model(agentpose, best_twist);
-    // final_pose = kinematic_model.calculateNewPosition(time);
-    // // std::cout << "reMoved to new position: x=" << final_pose.position.x << ", y=" << final_pose.position.y << std::endl;
-    // //   std::cout << "rfinal_yaw: x=" << final_yaw<< std::endl;
-    // // 发布信息
-    // gazebo_msgs::ModelState amodel_state;
-    // amodel_state.model_name = agentname;
-    // amodel_state.pose = final_pose;
-    // model_states_pub_.publish(amodel_state);
-    // newpose = final_pose;
-    // newposes.push_back(newpose);
-    // std::size_t size = newposes.size();
-    // // 发布pose信息
-    // geometry_msgs::PoseStamped pose_stamped_msg;
-    // pose_stamped_msg.header.stamp = ros::Time::now(); // 使用当前时间作为时间戳
-    // pose_stamped_msg.header.frame_id = "map";
-    // pose_stamped_msg.pose.position.x = newpose.position.x;
-    // pose_stamped_msg.pose.position.y = newpose.position.y;
-    // pose_stamped_msg.pose.orientation = newpose.orientation;
-    // // 发布 geometry_msgs::PoseStamped 类型的消息
-    // pose_stamped_pub_.publish(pose_stamped_msg);
-    // // 发布path信息
-    // nav_msgs::Path path_msg;
-    // path_msg.header.stamp = ros::Time::now();
-    // path_msg.header.frame_id = "map"; // 设置路径消息的坐标系
-    // // 需要设置较多的信息
-    // for (int i = 0; i < newposes.size(); ++i)
-    // {
-    //   // 添加路径点到路径消息中
-    //   geometry_msgs::PoseStamped pose;
-    //   pose.header.stamp = ros::Time::now();
-    //   pose.header.frame_id = "map"; // 设置路径点的坐标系
-    //   pose.pose = newposes[i];
-    //   path_msg.poses.push_back(pose); // 将路径点添加到路径消息中
-    // }
-    // path_pub_.publish(path_msg); // 发布路径消息
-    ros::shutdown();
+    RVO::DWAPlanner planner(new_pose, other_models_states, max_linear_speed, max_angular_speed, time, num, agentpose, theta);
+    // 查找最佳速度，final_pose，最佳分数
+    const geometry_msgs::Twist &best_twist = planner.FindBestTwist(agentpose);
+    std::cout << " best_twist.linear.xx=" << best_twist.linear.x << ", y=" << best_twist.angular.z << std::endl;
+    geometry_msgs::Pose final_pose;
+    KinematicModel kinematic_model(agentpose, best_twist);
+    final_pose = kinematic_model.calculateNewPosition(time);
+    // std::cout << "reMoved to new position: x=" << final_pose.position.x << ", y=" << final_pose.position.y << std::endl;
+    //   std::cout << "rfinal_yaw: x=" << final_yaw<< std::endl;
+    // 发布信息
+    gazebo_msgs::ModelState amodel_state;
+    amodel_state.model_name = agentname;
+    amodel_state.pose = final_pose;
+    model_states_pub_.publish(amodel_state);
+    newpose = final_pose;
+    newposes.push_back(newpose);
+    std::size_t size = newposes.size();
+    // 发布pose信息
+    geometry_msgs::PoseStamped pose_stamped_msg;
+    pose_stamped_msg.header.stamp = ros::Time::now(); // 使用当前时间作为时间戳
+    pose_stamped_msg.header.frame_id = "map";
+    pose_stamped_msg.pose.position.x = newpose.position.x;
+    pose_stamped_msg.pose.position.y = newpose.position.y;
+    pose_stamped_msg.pose.orientation = newpose.orientation;
+    // 发布 geometry_msgs::PoseStamped 类型的消息
+    pose_stamped_pub_.publish(pose_stamped_msg);
+    // 发布path信息
+    nav_msgs::Path path_msg;
+    path_msg.header.stamp = ros::Time::now();
+    path_msg.header.frame_id = "map"; // 设置路径消息的坐标系
+    // 需要设置较多的信息
+    for (int i = 0; i < newposes.size(); ++i)
+    {
+      // 添加路径点到路径消息中
+      geometry_msgs::PoseStamped pose;
+      pose.header.stamp = ros::Time::now();
+      pose.header.frame_id = "map"; // 设置路径点的坐标系
+      pose.pose = newposes[i];
+      path_msg.poses.push_back(pose); // 将路径点添加到路径消息中
+    }
+    path_pub_.publish(path_msg); // 发布路径消息
+   // ros::shutdown();
   }
 
   std::vector<gazebo_msgs::ModelState> ModelSubPub::getothermodels() const

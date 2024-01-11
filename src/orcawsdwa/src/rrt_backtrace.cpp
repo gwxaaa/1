@@ -3,6 +3,7 @@
 #include "rrt_backtrace.h"
 #include <algorithm>
 #include <iostream>
+#include <cmath>
 namespace RVO
 {
     std::vector<RVO::RRTBacktrace::NodeWithParent> RVO::RRTBacktrace::addParentInfoToNodes(std::vector<Node1> &returned_path)
@@ -55,35 +56,75 @@ namespace RVO
         return path;
     }
 
-    RVO::RRTBacktrace::Node1 RVO::RRTBacktrace::moveAlongLine(const Node1 &start, const Node1 &end, double ratio)
+    RVO::RRTBacktrace::Node1 RVO::RRTBacktrace::moveAlongLine(const Node1 &start, const Node1 &middle, const Node1 &end, double ratio)
     {
-      // 计算方向向量
-      double deltaX = end.x_ - start.x_;
-      double deltaY = end.y_ - start.y_;
-      // 计算移动后的坐标
-      double newX = start.x_ + ratio * deltaX;
-      double newY = start.y_ + ratio * deltaY;
-      return Node1(1,newX, newY);
-    }
+        // 计算起点到终点的方向向量
+        double deltaX = end.x_ - start.x_;
+        double deltaY = end.y_ - start.y_;
+        // 计算线段长度
+        double length = std::sqrt(deltaX * deltaX + deltaY * deltaY);
+        // 计算单位方向向量
+        if (length > 0)
+        {
+            // 计算单位方向向量
+            double unitX = deltaX / length;
+            double unitY = deltaY / length;
+            // 计算中间点到直线起点的向量
+            double vectorToMiddleX = middle.x_ - start.x_;
+            double vectorToMiddleY = middle.y_ - start.y_;
+            // 计算中间点到直线的投影长度
+            double projectionLength = vectorToMiddleX * unitX + vectorToMiddleY * unitY;
+            // 计算投影点的坐标
+            double projectionX = start.x_ + projectionLength * unitX;
+            double projectionY = start.y_ + projectionLength * unitY;
+            // 计算中间点到投影点的向量
+            double vectorToProjectionX = projectionX - middle.x_;
+            double vectorToProjectionY = projectionY - middle.y_;
+            // 根据比例调整中间点的位置
+            double moveX = ratio * vectorToProjectionX;
+            double moveY = ratio * vectorToProjectionY;
+            // 计算移动后的坐标
+            double newX = middle.x_ + moveX;
+            double newY = middle.y_ + moveY;
+            Node1 adjustedNode(1, newX, newY);
 
-    std::vector<RVO::RRTBacktrace::Node1> RVO::RRTBacktrace::processNodes(std::vector<Node1> path)
+            return adjustedNode;
+        }
+        else
+        {
+            return middle;
+        }
+    }
+    // RVO::RRTBacktrace::Node1 RVO::RRTBacktrace::moveAlongLine(const Node1 &start,const Node1 &middle,  const Node1 &end, double ratio)
+    // {
+    //   // 计算方向向量
+    //   double deltaX = end.x_ - start.x_;
+    //   double deltaY = end.y_ - start.y_;
+    //   // 计算移动后的坐标
+    //   double newX = start.x_ + ratio * deltaX;
+    //   double newY = start.y_ + ratio * deltaY;
+    //   //因为这个时候的结果是按照顺序连接的，也就是说此时的id是什么已经无所谓了
+    //   return Node1(1,newX, newY);
+    // }
+
+    std::vector<RVO::RRTBacktrace::Node1> RVO::RRTBacktrace::processNodes(std::vector<Node1> path, double ratio)
     {
-      std::vector<Node1> processedNodes;
-      // 处理第一个节点
-      processedNodes.push_back(path[0]);
-      // 遍历处理每两个相邻的节点
-      for (size_t i = 0; i < path.size() - 1; ++i)
-      {
-        // 移动第二个节点
-        Node1 adjustedNode = moveAlongLine(path[i], path[i + 1], 0.1);
-        processedNodes.push_back(adjustedNode); // 调整后的节点
-      }
-      // 添加最后一个节点
-      processedNodes.push_back(path.back());
-      return processedNodes;
+        std::vector<Node1> processedNodes;
+        // 处理第一个节点
+        processedNodes.push_back(path[0]);
+        // 遍历处理每两个相邻的节点
+        for (size_t i = 1; i < path.size() - 1; ++i)
+        {
+            // 移动第二个节点
+            Node1 adjustedNode = moveAlongLine(path[i - 1], path[i], path[i + 1], 0.3);
+            processedNodes.push_back(adjustedNode); // 调整后的节点
+                                                    //  path[i] = adjustedNode;
+        }
+        // 添加最后一个节点
+        processedNodes.push_back(path.back());
+        return processedNodes;
     }
 }
-
 
 // #include "rrt_backtrace.h"
 // #include <algorithm>

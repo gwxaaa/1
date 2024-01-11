@@ -30,6 +30,12 @@ namespace RVO
     int iteration = 0;
     while (iteration < sample_num)
     {
+      if (checkGoal(start_node))
+      {
+        path.push_back(start_node); // Add the goal node to the path
+        path.push_back(goal_);      // 将终点方进来，保证最后可以到达终点位置
+        return path;
+      }
       std::cout << "S iteration: (" << iteration << std::endl;
       Node sample_node = generateRandomNode(size_);
       bool isSampleNodeInObstacles = false;
@@ -62,13 +68,6 @@ namespace RVO
         }
         else
         {
-          // 将靠的近一点的节点放进去
-          // if (calculateDistance(result.random_node, goal_) < calculateDistance(path.back(), goal_))
-          // {
-          //   path.pop_back();
-          // sample_list_.insert(std::make_pair(new_node.id_, new_node));
-          // path.push_back(new_node);
-          // return path;
           iteration++;
           continue;
           // }
@@ -172,7 +171,6 @@ namespace RVO
       {
         // Node goal(1, goal_.x_, goal_.y_);
         // sample_list_.insert(std::make_pair(goal.id_, goal));
-
         return true;
       }
     }
