@@ -20,6 +20,7 @@
 #include "Vector2.h"
 namespace RVO
 {
+  // RRTmain* myRRTinstance=nullptr;
   RRTmain::RRTmain(const std::string &modelName, double time, gazebo_msgs::ModelState target_model_state,
                    geometry_msgs::Pose goal_pose,
                    double sample_num, double step, double size_, double ratio)
@@ -30,7 +31,9 @@ namespace RVO
         sample_num(sample_num),
         step(step),
         size_(size_),
-        ratio(ratio)
+        ratio(ratio),
+        isFirstCalculation(true),
+        shouldRecompute(true)
 
   {
     // 初始化ROS节点
@@ -47,6 +50,23 @@ namespace RVO
   void RRTmain::modelStatesCallback1(const gazebo_msgs::ModelStates::ConstPtr &msg)
   {
 
+    std::cout << "isFirstCalculation: " << isFirstCalculation << std::endl;
+    std::cout << "shouldRecompute: " << shouldRecompute << std::endl;
+    if (!isFirstCalculation && !shouldRecompute)
+    {
+      return;
+    }
+    // // 如果是第一次计算或者远离计算点，则将 shouldRecompute 设置为 true
+    // if (isFirstCalculation)
+    // {
+    //   shouldRecompute = true;
+    //   isFirstCalculation = false; // 第一次计算后更新标志
+    // }
+    // // 检查重新计算标志是否为 false，如果为 true，则跳过计算
+    // if (!shouldRecompute)
+    // {
+    //   return;
+    // }
     other_models_states.clear();
     for (size_t i = 0; i < msg->name.size(); ++i)
     {
@@ -68,16 +88,14 @@ namespace RVO
         other_models_states.push_back(other_model_state);
       }
     }
-    // 目标模型信息格式的转换，终点信息的转换
+
     std::string agentname = target_model_;
     agentpose = target_model_state.pose;
     agenttwist = target_model_state.twist;
     // 格式转化
     Vector2 agentPosition(agentpose.position.x, agentpose.position.y);
-
     // Vector2 goalPosition(goal_pose.position.x, goal_pose.position.y);
     //  创建 RRT 对象
-    flag = true;
     // 这个信息在前面的话就可以出现，但是在这个rrt后面就不
     RVO::RRT rrt(other_models_states, target_model_state.pose, goal_pose, sample_num, step, size_);
     // 运行 RRT 算法得到下一个可行的节点
@@ -97,6 +115,10 @@ namespace RVO
     //  double ratio = 0.1;
     adjusted_path = RVO::RRTBacktrace::processNodes(path, ratio);
     flag = false;
+    isFirstCalculation = false;
+    shouldRecompute = false;
+    std::cout << "1isFirstCalculation: " << isFirstCalculation << std::endl;
+    std::cout << "1shouldRecompute: " << shouldRecompute << std::endl;
     double number_of_points1 = path.size();
     // for (const auto &node : path)
     // {
@@ -107,7 +129,7 @@ namespace RVO
     // {
     //   std::cout << "222Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
     // }
-    ros::Rate rate(5);
+    ros::Rate rate(30);
     visualization_msgs::MarkerArray marker_array_msg;
     for (int i = 0; i < number_of_points - 1; i += 2)
     {
@@ -260,10 +282,9 @@ namespace RVO
     marker_array_msg.markers.push_back(marker);
     marker_array_pub.publish(marker_array_msg);
     rate.sleep(); // 暂停，等待指定的频率
-
-    Vector2 goalPosition(adjusted_path[1].x_, adjusted_path[1].y_);
-    std::cout << "s goalPosition " << goalPosition.x() << ",  goalPosition " << goalPosition.y() << std::endl;
-  //  ros::shutdown();
+    // Vector2 goalPosition(adjusted_path[1].x_, adjusted_path[1].y_);
+    // std::cout << "s goalPosition " << goalPosition.x() << ",  goalPosition " << goalPosition.y() << std::endl;
+    // ros::shutdown();
   }
 
   std::vector<gazebo_msgs::ModelState> RRTmain::getothermodels1() const
@@ -287,7 +308,12 @@ namespace RVO
 
       finalPathPoses.push_back(pose);
     }
-
     return finalPathPoses;
   }
+  // 示例函数，用于判断是否远离计算点
+  // bool isFarFromCalculationPoint()
+  // {
+
+  //   return true;
+  // }
 }

@@ -42,8 +42,8 @@ int main(int argc, char **argv)
     gazebo_msgs::ModelState target_model_state;
     target_model_state.twist.linear.x = twist_linear_x;
     target_model_state.twist.angular.z = twist_angular_z;
-    RVO::RRTmain RRTmain(targetModelName, time, target_model_state, goal_pose,
-                         sample_num, step, size_, ratio);
+    // RVO::RRTmain RRTmain(targetModelName, time, target_model_state, goal_pose,
+    //                      sample_num, step, size_, ratio);
     RVO::ModelSubPub modelSubPub(targetModelName, time, target_model_state, goal_pose,
                                  maxSpeed_, neighborDistance_, timeHorizon_, radius_, num, max_angular_speed, max_linear_speed, sample_num, step, size_, ratio);
     ros::Rate rate(10);

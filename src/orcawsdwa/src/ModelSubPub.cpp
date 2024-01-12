@@ -39,7 +39,9 @@ namespace RVO
         max_linear_speed(max_linear_speed),
         max_angular_speed(max_angular_speed),
         newVelocities(1, Vector2(0, 0)),
-        polygonVertices(polygonVertices)
+        myRRTinstance(modelName_, time, target_model_state, goal_pose,
+                      sample_num, step, size_, ratio)
+
   {
     // 初始化ROS节点
     ros::NodeHandle nh;
@@ -87,36 +89,57 @@ namespace RVO
     double velocityX = agenttwist.linear.x * cos(deltaTheta);
     double velocityY = agenttwist.linear.x * sin(deltaTheta);
     Vector2 agentVelocity(velocityX, velocityY);
-    // 这个是一直循环的
-    // 将RRT算法的结果进行输出
-
     // 传入的是一个路径，判断机器人此刻的位置点和下一个目标点的距离，判断距离，然后将点的信息进行修改
-    RVO::RRTmain myRRTinstance(modelName_, time, target_model_state, goal_pose,
-                               sample_num, step, size_, ratio);
+    // RVO::RRTmain myRRTinstance(modelName_, time, target_model_state, goal_pose,
+    //                            sample_num, step, size_, ratio);
+    // 判断是否是第一次计算或远离计算点，如果是则设置重新计算标志为 true
     std::vector<geometry_msgs::Pose> pathPoses = myRRTinstance.getFinalPathPoses();
-    size_t current_target_index = 0;
-    // 如果还有未达到的目标点
-    if (current_target_index < pathPoses.size())
+    Vector2 current_position(agentpose.position.x, agentpose.position.y);
+    // 寻找最接近的目标点
+    double min_distance = std::numeric_limits<double>::max();
+    size_t closest_target_index = 0;
+
+    for (size_t i = 0; i < pathPoses.size() - 1; ++i)
     {
-      // 获取当前目标点的坐标
-      Vector2 goalPosition(pathPoses[current_target_index + 1].position.x, pathPoses[current_target_index + 1].position.y);
+      Vector2 target_position(pathPoses[i ].position.x, pathPoses[i ].position.y);
+      double distance_to_target = std::sqrt(std::pow(current_position.x() - target_position.x(), 2) +
+                                            std::pow(current_position.y() - target_position.y(), 2));
 
-      // 计算当前位置与目标点的距离
-      double distance_to_target = std::sqrt(std::pow(agentpose.position.x - goalPosition.x(), 2) +
-                                            std::pow(agentpose.position.y - goalPosition.y(), 2));
-
-      // 如果距离小于某个阈值，切换到下一个目标点
-      if (distance_to_target < 0.1) // 这里的0.1是阈值
+      if (distance_to_target <= min_distance)
       {
-        ++current_target_index;
+        min_distance = distance_to_target;
+        closest_target_index = i;
+        std::cout << " closest_target_index: " << closest_target_index << std::endl;
       }
     }
-    else
-    {
-      ROS_INFO("Reached the final target!");
-    }
 
+    // // 如果最近的点是路径的最后一个点，则将其作为目标点
+    // if (closest_target_index == pathPoses.size() - 1)
+    // {
+    //   closest_target_index = pathPoses.size()-1;
+    // }
+
+    // 设置目标点
+    Vector2 goalPosition(pathPoses[closest_target_index + 1].position.x, pathPoses[closest_target_index + 1].position.y);
+    std::cout << "Selected goal position: x=" << goalPosition.x() << ", y=" << goalPosition.y() << std::endl;
+    size_t current_target_index;
+    // for (current_target_index = 0; current_target_index < pathPoses.size(); ++current_target_index)
+    // {
+    //   // 获取当前目标点的坐标
+    //   std::cout << "current_target_index: " << current_target_index << std::endl;
+    //   std::cout << "pathPoses.size(): " << pathPoses.size() << std::endl;
+    //   Vector2 goalPosition(pathPoses[current_target_index + 1].position.x, pathPoses[current_target_index + 1].position.y);
+    //   std::cout << "Inside for, x: " << goalPosition.x() << ", y: " << goalPosition.y() << std::endl;
+    //   double distance_to_target = std::sqrt(std::pow(agentpose.position.x - goalPosition.x(), 2) +
+    //                                         std::pow(agentpose.position.y - goalPosition.y(), 2));
+
+    //   if (distance_to_target <= 0.1) // 这里的0.1是阈值
+    //   {
+    //     continue;
+    //   }
+    // }
     //  开始计算ORCA算法
+    std::cout << "Inside for, x: " << goalPosition.x() << ", y: " << goalPosition.y() << std::endl;
     RVO::Neighbor neighborobject(*this);
     // // 获取计算后的邻居信息
     std::vector<RVO::Agent *> agentNeighbors_ = neighborobject.getAgentNeighbors();
@@ -155,6 +178,7 @@ namespace RVO
     std::cout << " best_twist.linear.xx=" << best_twist.linear.x << ", y=" << best_twist.angular.z << std::endl;
     geometry_msgs::Pose final_pose;
     KinematicModel kinematic_model(agentpose, best_twist);
+
     final_pose = kinematic_model.calculateNewPosition(time);
     // std::cout << "reMoved to new position: x=" << final_pose.position.x << ", y=" << final_pose.position.y << std::endl;
     //   std::cout << "rfinal_yaw: x=" << final_yaw<< std::endl;
@@ -190,6 +214,51 @@ namespace RVO
       path_msg.poses.push_back(pose); // 将路径点添加到路径消息中
     }
     path_pub_.publish(path_msg); // 发布路径消息
+
+    if (current_target_index == pathPoses.size())
+    {
+      ROS_INFO("Reached the final target!");
+    }
+    //   // 如果距离小于某个阈值，切换到下一个目标点
+
+    std::cout << ", x: " << goalPosition.x() << ", y: " << goalPosition.y() << std::endl;
+    if (myRRTinstance.isFirstCalculation)
+    {
+
+      myRRTinstance.setRecomputeFlag(true);
+      myRRTinstance.modelStatesCallback1(msg);
+      std::vector<geometry_msgs::Pose> pathPoses = myRRTinstance.getFinalPathPoses();
+      Vector2 goalPosition(pathPoses[1].position.x, pathPoses[1].position.y);
+      std::cout << ", x: " << goalPosition.x() << ", y: " << goalPosition.y() << std::endl;
+    }
+
+    // else
+    // {
+    //   std::vector<geometry_msgs::Pose> pathPoses = myRRTinstance.getFinalPathPoses();
+    //   // 如果这里不是第一次计算，
+    //   size_t current_target_index = 0;
+    //   // 如果还有未达到的目标点
+    //   if (current_target_index < pathPoses.size())
+    //   {
+    //     // 获取当前目标点的坐标
+    //     Vector2 goalPosition(pathPoses[current_target_index + 1].position.x, pathPoses[current_target_index + 1].position.y);
+
+    //     // 计算当前位置与目标点的距离
+    //     double distance_to_target = std::sqrt(std::pow(agentpose.position.x - goalPosition.x(), 2) +
+    //                                           std::pow(agentpose.position.y - goalPosition.y(), 2));
+
+    //     // 如果距离小于某个阈值，切换到下一个目标点
+    //     if (distance_to_target < 0.1) // 这里的0.1是阈值
+    //     {
+    //       ++current_target_index;
+    //     }
+    //   }
+    //   else
+    //   {
+    //     ROS_INFO("Reached the final target!");
+    //   }
+    // };
+
     // ros::shutdown();
   }
 

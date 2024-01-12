@@ -11,6 +11,7 @@
 #include "Line.h"
 #include "Vector2.h"
 #include <visualization_msgs/Marker.h>
+#include <RRTmain.h>
 namespace RVO
 {
   class RRT;
@@ -74,7 +75,7 @@ namespace RVO
     double min_linear_speed;
     double min_angular_speed;
     std::vector<geometry_msgs::Pose> obstacle_poses;
-    std::vector<Vector2> &polygonVertices;
+  
     std::vector<RVO::Line> orcaLines;
     Vector2 currentPosition;
     Vector2 minVelocity;
@@ -85,6 +86,7 @@ namespace RVO
     std::vector<geometry_msgs::Pose> newposes;
     geometry_msgs::Pose newpose;
     geometry_msgs::Point p;
+    RRTmain myRRTinstance;
     // Node new_goal_node;
     //  std::vector<Obstacle> obstacles;
   };

@@ -18,6 +18,7 @@ namespace RVO
   class RRTmain
   {
   public:
+
     RRTmain(const std::string &modelName, double time, gazebo_msgs::ModelState target_model_state, geometry_msgs::Pose goal_pose,
             double sample_num, double step, double size_, double ratio);
     // 回调函数，处理模型状态信息
@@ -26,8 +27,12 @@ namespace RVO
     std::vector<geometry_msgs::Pose> getFinalPathPoses() const;
     double radius_; // 避障半径
     std::vector<RVO::RRTBacktrace::Node1> adjusted_path;
-
-
+    void setRecomputeFlag(bool flag)
+    {
+      shouldRecompute = flag;
+    };
+    bool shouldRecompute;
+    bool isFirstCalculation; // 用于追踪是否是第一次计算
   private:
     ros::NodeHandle nh;
     ros::Subscriber model_states_sub_;
@@ -67,5 +72,6 @@ namespace RVO
     //  std::vector<Obstacle> obstacles;
     bool flag;
   };
+   //  extern RRTmain* myRRTinstance;
 } // namespace RVO
 #endif // RRT_MAIN_H

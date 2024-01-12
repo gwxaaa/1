@@ -87,9 +87,9 @@ namespace RVO
             double newX = middle.x_ + moveX;
             double newY = middle.y_ + moveY;
             Node1 adjustedNode(1, newX, newY);
-            std::cout << "Projection Length: " << projectionLength << std::endl;
-            std::cout << "Move Distance: " << sqrt(moveX * moveX + moveY * moveY) << std::endl;
-            std::cout << " ratio: " << ratio << std::endl;
+            // std::cout << "Projection Length: " << projectionLength << std::endl;
+            // std::cout << "Move Distance: " << sqrt(moveX * moveX + moveY * moveY) << std::endl;
+            // std::cout << " ratio: " << ratio << std::endl;
             return adjustedNode;
         }
         else
