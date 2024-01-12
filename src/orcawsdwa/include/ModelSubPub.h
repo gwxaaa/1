@@ -87,6 +87,7 @@ namespace RVO
     geometry_msgs::Pose newpose;
     geometry_msgs::Point p;
     RRTmain myRRTinstance;
+      bool needReplan;  // 新增的标志，指示是否需要重新规划路径
     // Node new_goal_node;
     //  std::vector<Obstacle> obstacles;
   };

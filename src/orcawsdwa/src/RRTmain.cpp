@@ -52,21 +52,21 @@ namespace RVO
 
     std::cout << "isFirstCalculation: " << isFirstCalculation << std::endl;
     std::cout << "shouldRecompute: " << shouldRecompute << std::endl;
-    if (!isFirstCalculation && !shouldRecompute)
-    {
-      return;
-    }
-    // // 如果是第一次计算或者远离计算点，则将 shouldRecompute 设置为 true
-    // if (isFirstCalculation)
-    // {
-    //   shouldRecompute = true;
-    //   isFirstCalculation = false; // 第一次计算后更新标志
-    // }
-    // // 检查重新计算标志是否为 false，如果为 true，则跳过计算
-    // if (!shouldRecompute)
+    // if (!isFirstCalculation && !shouldRecompute)
     // {
     //   return;
     // }
+    // 如果是第一次计算或者远离计算点，则将 shouldRecompute 设置为 true
+    if (isFirstCalculation)
+    {
+      shouldRecompute = true;
+      isFirstCalculation = false; // 第一次计算后更新标志
+    }
+    // 检查重新计算标志是否为 false，如果为 true，则跳过计算
+    if (!shouldRecompute)
+    {
+      return;
+    }
     other_models_states.clear();
     for (size_t i = 0; i < msg->name.size(); ++i)
     {
@@ -115,7 +115,7 @@ namespace RVO
     //  double ratio = 0.1;
     adjusted_path = RVO::RRTBacktrace::processNodes(path, ratio);
     flag = false;
-    isFirstCalculation = false;
+    //isFirstCalculation = false;
     shouldRecompute = false;
     std::cout << "1isFirstCalculation: " << isFirstCalculation << std::endl;
     std::cout << "1shouldRecompute: " << shouldRecompute << std::endl;

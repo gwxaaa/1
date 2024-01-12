@@ -75,19 +75,42 @@ namespace RVO
       }
       // iteration++;
     }
+    path.push_back(start_node); // Add the goal node to the path
+    path.push_back(goal_);
     return path;
   }
 
+  // Node RRT::generateRandomNode(double size_)
+  // {
+  //   Node random_node;
+  //   // 确定矩形区域的边界
+  //   double min_val_x = std::min(current_pose_.position.x - 0.5, goal_pose_.position.x - 0.5);
+  //   double max_val_x = std::max(current_pose_.position.x + 0.5, goal_pose_.position.x + 0.5);
+  //   double min_val_y = std::min(current_pose_.position.y - 0.5, goal_pose_.position.y - 0.5);
+  //   double max_val_y = std::max(current_pose_.position.y + 0.5, goal_pose_.position.y + 0.5);
+
+  //   // 随机生成符合高斯分布的点
+  //   std::random_device rd;
+  //   std::mt19937 gen(rd());
+  //   std::normal_distribution<double> x_dist((min_val_x + max_val_x) / 2.0, (max_val_x - min_val_x) / 4.0);
+  //   std::normal_distribution<double> y_dist((min_val_y + max_val_y) / 2.0, (max_val_y - min_val_y) / 4.0);
+  //   random_node.x_ = x_dist(gen);
+  //   random_node.y_ = y_dist(gen);
+  //   std::uniform_int_distribution<int> distr(1, std::numeric_limits<int>::max()); // 1到INT_MAX之间的随机整数
+  //   random_node.id_ = distr(gen);
+
+  //   return random_node;
+  // }
   Node RRT::generateRandomNode(double size_)
   {
     Node random_node;
-    // 将代码修改，求解起点和终点之间的高斯分布随机点
     std::random_device rd;
     std::mt19937 gen(rd());
     double center_x = (current_pose_.position.x + goal_pose_.position.x) / 2.0;
     double center_y = (current_pose_.position.y + goal_pose_.position.y) / 2.0;
     std::normal_distribution<double> gauss_x(center_x, 1);
     std::normal_distribution<double> gauss_y(center_y, 1);
+    // 将代码修改，求解起点和终点之间的高斯分布随机点
     random_node.x_ = gauss_x(gen);
     random_node.y_ = gauss_y(gen);
     // double min_val = -std::abs(size_);
@@ -98,7 +121,6 @@ namespace RVO
     // random_node.y_ = y_dist(gen);
     std::uniform_int_distribution<int> distr(1, std::numeric_limits<int>::max()); // 1到INT_MAX之间的随机整数
     random_node.id_ = distr(gen);
-
     return random_node;
   }
 
@@ -106,12 +128,6 @@ namespace RVO
   {
     Node nearest_node;
     double min_dist = std::numeric_limits<double>::max();
-    // Node RRT::findNearestPoint(std::unordered_map<int, Node> &sample_list_, Node &random_node)
-    // {
-    //   Node nearest_node;
-    //   double min_dist = std::numeric_limits<double>::max();
-    //   bool isNearestInvalid = false;
-    // std::cout << "Sample Node Coordinate: (" << random_node.x_ << ", " << random_node.y_ << ")" << std::endl;
     for (const auto &point : sample_list_)
     {
       double new_dist = calculateDistance(point.second, random_node);
@@ -146,7 +162,7 @@ namespace RVO
 
   bool RRT::_isAnyObstacleInPath(const Node &n1, const Node &n2)
   {
-    double dist_threshold = 0.5;
+    double dist_threshold = 0.4;
     double x1 = n1.x_;
     double y1 = n1.y_;
     double x2 = n2.x_;

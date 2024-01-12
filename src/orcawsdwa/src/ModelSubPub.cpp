@@ -41,6 +41,7 @@ namespace RVO
         newVelocities(1, Vector2(0, 0)),
         myRRTinstance(modelName_, time, target_model_state, goal_pose,
                       sample_num, step, size_, ratio)
+     
 
   {
     // 初始化ROS节点
@@ -56,7 +57,17 @@ namespace RVO
   // 回调函数，处理模型状态信息
   void ModelSubPub::modelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg)
   {
-
+    /////判断是否需要重新规划路径
+    // if (needReplan)
+    // {
+    //   // 设置重新规划标志为 false，防止多次触发
+    //   needReplan = false;
+    //   // myRRTinstance.isFirstCalculation(true);
+    //   // 重新规划路径的代码
+    //   myRRTinstance.setRecomputeFlag(true);
+    //   myRRTinstance.modelStatesCallback1(msg);
+    //   //   std::vector<geometry_msgs::Pose> pathPoses = myRRTinstance.getFinalPathPoses();
+    // }
     other_models_states.clear();
     for (size_t i = 0; i < msg->name.size(); ++i)
     {
@@ -101,7 +112,7 @@ namespace RVO
 
     for (size_t i = 0; i < pathPoses.size() - 1; ++i)
     {
-      Vector2 target_position(pathPoses[i ].position.x, pathPoses[i ].position.y);
+      Vector2 target_position(pathPoses[i].position.x, pathPoses[i].position.y);
       double distance_to_target = std::sqrt(std::pow(current_position.x() - target_position.x(), 2) +
                                             std::pow(current_position.y() - target_position.y(), 2));
 
@@ -112,32 +123,13 @@ namespace RVO
         std::cout << " closest_target_index: " << closest_target_index << std::endl;
       }
     }
-
-    // // 如果最近的点是路径的最后一个点，则将其作为目标点
-    // if (closest_target_index == pathPoses.size() - 1)
-    // {
-    //   closest_target_index = pathPoses.size()-1;
-    // }
-
     // 设置目标点
     Vector2 goalPosition(pathPoses[closest_target_index + 1].position.x, pathPoses[closest_target_index + 1].position.y);
     std::cout << "Selected goal position: x=" << goalPosition.x() << ", y=" << goalPosition.y() << std::endl;
     size_t current_target_index;
-    // for (current_target_index = 0; current_target_index < pathPoses.size(); ++current_target_index)
-    // {
-    //   // 获取当前目标点的坐标
-    //   std::cout << "current_target_index: " << current_target_index << std::endl;
-    //   std::cout << "pathPoses.size(): " << pathPoses.size() << std::endl;
-    //   Vector2 goalPosition(pathPoses[current_target_index + 1].position.x, pathPoses[current_target_index + 1].position.y);
-    //   std::cout << "Inside for, x: " << goalPosition.x() << ", y: " << goalPosition.y() << std::endl;
-    //   double distance_to_target = std::sqrt(std::pow(agentpose.position.x - goalPosition.x(), 2) +
-    //                                         std::pow(agentpose.position.y - goalPosition.y(), 2));
+    // 最后的终点---作为相应的判断条件
+    Vector2 last_point(pathPoses[pathPoses.size() - 1].position.x, pathPoses[pathPoses.size() - 1].position.y);
 
-    //   if (distance_to_target <= 0.1) // 这里的0.1是阈值
-    //   {
-    //     continue;
-    //   }
-    // }
     //  开始计算ORCA算法
     std::cout << "Inside for, x: " << goalPosition.x() << ", y: " << goalPosition.y() << std::endl;
     RVO::Neighbor neighborobject(*this);
@@ -178,10 +170,19 @@ namespace RVO
     std::cout << " best_twist.linear.xx=" << best_twist.linear.x << ", y=" << best_twist.angular.z << std::endl;
     geometry_msgs::Pose final_pose;
     KinematicModel kinematic_model(agentpose, best_twist);
-
     final_pose = kinematic_model.calculateNewPosition(time);
-    // std::cout << "reMoved to new position: x=" << final_pose.position.x << ", y=" << final_pose.position.y << std::endl;
-    //   std::cout << "rfinal_yaw: x=" << final_yaw<< std::endl;
+    double distance_to_last_point = std::sqrt(std::pow(goalPosition.x() - last_point.x(), 2) +
+                                              std::pow(goalPosition.y() - last_point.y(), 2));
+
+   // 如果距离大于0.3且速度很小，设置重新规划标志
+   //这个可以引发重规划，但是引发次数过多
+    if (distance_to_last_point > 0.5 && std::sqrt(std::pow(best_twist.linear.x, 2) + std::pow(best_twist.angular.z, 2)) < 0.01)
+    {
+      // 设置重新规划标志为 true
+      myRRTinstance.setRecomputeFlag(true);
+
+    }
+
     // 发布信息
     gazebo_msgs::ModelState amodel_state;
     amodel_state.model_name = agentname;
@@ -232,32 +233,7 @@ namespace RVO
       std::cout << ", x: " << goalPosition.x() << ", y: " << goalPosition.y() << std::endl;
     }
 
-    // else
-    // {
-    //   std::vector<geometry_msgs::Pose> pathPoses = myRRTinstance.getFinalPathPoses();
-    //   // 如果这里不是第一次计算，
-    //   size_t current_target_index = 0;
-    //   // 如果还有未达到的目标点
-    //   if (current_target_index < pathPoses.size())
-    //   {
-    //     // 获取当前目标点的坐标
-    //     Vector2 goalPosition(pathPoses[current_target_index + 1].position.x, pathPoses[current_target_index + 1].position.y);
 
-    //     // 计算当前位置与目标点的距离
-    //     double distance_to_target = std::sqrt(std::pow(agentpose.position.x - goalPosition.x(), 2) +
-    //                                           std::pow(agentpose.position.y - goalPosition.y(), 2));
-
-    //     // 如果距离小于某个阈值，切换到下一个目标点
-    //     if (distance_to_target < 0.1) // 这里的0.1是阈值
-    //     {
-    //       ++current_target_index;
-    //     }
-    //   }
-    //   else
-    //   {
-    //     ROS_INFO("Reached the final target!");
-    //   }
-    // };
 
     // ros::shutdown();
   }
@@ -267,4 +243,9 @@ namespace RVO
     return other_models_states;
   };
 
+  // // 设置重新规划标志
+  // void setReplanFlag(bool replan)
+  // {
+  //   needReplan = replan;
+  // };
 }
