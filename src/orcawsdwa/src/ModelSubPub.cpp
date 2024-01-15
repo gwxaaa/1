@@ -171,12 +171,12 @@ namespace RVO
     geometry_msgs::Pose final_pose;
     KinematicModel kinematic_model(agentpose, best_twist);
     final_pose = kinematic_model.calculateNewPosition(time);
-    double distance_to_last_point = std::sqrt(std::pow(goalPosition.x() - last_point.x(), 2) +
-                                              std::pow(goalPosition.y() - last_point.y(), 2));
+    double distance_to_last_point = std::sqrt(std::pow(goalPosition.x() - current_position.x(), 2) +
+                                              std::pow(goalPosition.y() - current_position.y(), 2));
 
    // 如果距离大于0.3且速度很小，设置重新规划标志
    //这个可以引发重规划，但是引发次数过多
-    if (distance_to_last_point > 0.5 && std::sqrt(std::pow(best_twist.linear.x, 2) + std::pow(best_twist.angular.z, 2)) < 0.01)
+    if (distance_to_last_point > 0.5 && std::sqrt(std::pow(best_twist.linear.x, 2)) < 0.01)
     {
       // 设置重新规划标志为 true
       myRRTinstance.setRecomputeFlag(true);

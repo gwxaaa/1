@@ -90,12 +90,12 @@ namespace RVO
   double DWAPlanner::CalculateCollision(const geometry_msgs::Pose &final_pose)
   {
     // 初始化参数
-    double min_collision_distance_model = 0.3; // model的最小碰撞距离
-    double avoidance_distance_model = 0.8;     // model的避障范围起始距离
+    double min_collision_distance_model = 1; // model的最小碰撞距离
+    double avoidance_distance_model = 1.4;     // model的避障范围起始距离
     // double collision_distance_threshold_model = 1.6; // model的碰撞阈值
 
-    double min_collision_distance_other = 0.1; // 其他的最小碰撞距离
-    double avoidance_distance_other = 0.4;     // 其他的避障范围起始距离
+    double min_collision_distance_other = 0.6; // 其他的最小碰撞距离
+    double avoidance_distance_other = 0.8;     // 其他的避障范围起始距离
                                                // double collision_distance_threshold_other = 0.8; // 其他的碰撞阈值
 
     double closest_distance_to_obstacle_model = std::numeric_limits<double>::max();
@@ -283,9 +283,9 @@ namespace RVO
     //   distance=-distance;
     // }
     // 设置权重
-    double distance_weight = -4;
-    double yaw_weight = -4;
-    double collision_weight = 1000;
+    double distance_weight = -1;
+    double yaw_weight = -1;
+    double collision_weight = 10000000;
     // 计算距离分数和碰撞分数
     double distance_score = distance_weight * distance;
     double yaw_score = yaw_weight * yaw;

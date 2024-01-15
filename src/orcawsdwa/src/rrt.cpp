@@ -75,7 +75,9 @@ namespace RVO
       }
       // iteration++;
     }
+
     path.push_back(start_node); // Add the goal node to the path
+
     path.push_back(goal_);
     return path;
   }
@@ -162,7 +164,7 @@ namespace RVO
 
   bool RRT::_isAnyObstacleInPath(const Node &n1, const Node &n2)
   {
-    double dist_threshold = 0.4;
+    double dist_threshold = 0.35;
     double x1 = n1.x_;
     double y1 = n1.y_;
     double x2 = n2.x_;

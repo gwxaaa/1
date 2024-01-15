@@ -215,8 +215,8 @@ namespace RVO
   {
     Vector2 position_(agentPosition);
     Vector2 velocity_(agentVelocity);
-    double velocityX1 = (goalPosition.x() - agentPosition.x()) ;
-    double velocityY1 = (goalPosition.y() - agentPosition.y()) ;
+    double velocityX1 = (goalPosition.x() - agentPosition.x()) *0.7;
+    double velocityY1 = (goalPosition.y() - agentPosition.y()) *0.7;
     Vector2 prefVelocity_(velocityX1, velocityY1);
     orcaLines_.clear();
     const float invTimeHorizonObst = 1.0 / timeHorizonObst_;

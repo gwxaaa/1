@@ -1,11 +1,11 @@
-<!-- 
+
 
 <launch>
     <include file="src/orcawsdwa/launch/pub.launch">
       <arg name="node_name" value="pub_sub41" />
       <arg name="target_model_name" value="model8.1_0" /> 
-      <arg name="goal_pose_x"  value="6" />
-      <arg name="goal_pose_y"  value="-1.4" />
+      <arg name="goal_pose_x"  value="-0.5" />
+      <arg name="goal_pose_y"  value="-4.4" />
       <arg name="/pose_stamped_topic"  value="/pose_stamped_topic41" />
       <arg name="/path_topic"  value="/path_topic41" />
       <arg name="/visualization_marker"  value="/visualization_marker41" />
@@ -15,19 +15,19 @@
     <include file="src/orcawsdwa/launch/pub.launch">
      <arg name="node_name" value="pub_sub42" />
      <arg name="target_model_name"  value="model8.1_1" />
-     <arg name="goal_pose_x"  value="5" />
-     <arg name="goal_pose_y"  value="-1.5" />
+     <arg name="goal_pose_x"  value="0.4" />
+     <arg name="goal_pose_y"  value="-4.5" />
      <arg name="/pose_stamped_topic"  value="/pose_stamped_topic42" />
      <arg name="/path_topic"  value="/path_topic42" />
      <arg name="/visualization_marker"  value="/visualization_marker42" />
      <arg name="/visualization_marker_array"  value="/visualization_marker_array42" />
     </include>
-
+<!-- 
     <include file="src/orcawsdwa/launch/pub.launch">
      <arg name="node_name" value="pub_sub43" />
      <arg name="target_model_name" value="model8.2_0" />
      <arg name="goal_pose_x"  value="0.3" />
-     <arg name="goal_pose_y"  value="3.2" />   
+     <arg name="goal_pose_y"  value="4.5" />   
      <arg name="/pose_stamped_topic"  value="/pose_stamped_topic43" />
      <arg name="/path_topic"  value="/path_topic43" />    
      <arg name="/visualization_marker"  value="/visualization_marker43" />
@@ -37,13 +37,13 @@
     <include file="src/orcawsdwa/launch/pub.launch">
      <arg name="node_name" value="pub_sub44" />
      <arg name="target_model_name" value="model8.2_1" />
-     <arg name="goal_pose_x"  value="-0.2" />
-     <arg name="goal_pose_y"  value="3.6" />
+     <arg name="goal_pose_x"  value="-0.5" />
+     <arg name="goal_pose_y"  value="4.6" />
      <arg name="/pose_stamped_topic"  value="/pose_stamped_topic44" />
      <arg name="/path_topic"  value="/path_topic44" />
      <arg name="/visualization_marker"  value="/visualization_marker44" />
      <arg name="/visualization_marker_array"  value="/visualization_marker_array44" />
-    </include>
+    </include> -->
 
     <include file="src/orcawsdwa/launch/pub.launch">
      <arg name="node_name" value="pub_sub45" />
@@ -70,8 +70,8 @@
     <include file="src/orcawsdwa/launch/pub.launch">
      <arg name="node_name" value="pub_sub47" />
      <arg name="target_model_name"  value="model8.4_0" />
-     <arg name="goal_pose_x"  value="4" />
-     <arg name="goal_pose_y"  value="-0.6" />
+     <arg name="goal_pose_x"  value="-3" />
+     <arg name="goal_pose_y"  value="-0.5" />
      <arg name="/pose_stamped_topic"  value="/pose_stamped_topic47" />
      <arg name="/path_topic"  value="/path_topic47" />
      <arg name="/visualization_marker"  value="/visualization_marker47" />
@@ -81,8 +81,8 @@
     <include file="src/orcawsdwa/launch/pub.launch">
      <arg name="node_name" value="pub_sub48" />
      <arg name="target_model_name"  value="model8.4_1" />
-     <arg name="goal_pose_x"  value="3.6" />
-     <arg name="goal_pose_y"  value="-0.5" />
+     <arg name="goal_pose_x"  value="-3" />
+     <arg name="goal_pose_y"  value="-1.3" />
      <arg name="/pose_stamped_topic"  value="/pose_stamped_topic48" />
      <arg name="/path_topic"  value="/path_topic48" />
      <arg name="/visualization_marker"  value="/visualization_marker48" />
@@ -90,9 +90,9 @@
     </include>
 
 
-</launch> -->
+</launch>
 
-
+<!-- 
 
 <launch>
     <include file="src/orcawsdwa/launch/pub.launch">
@@ -184,9 +184,103 @@
     </include>
 
 
+</launch> -->
+
+
+<!-- 合二为一 -->
+
+<!-- <launch>
+    <include file="src/orcawsdwa/launch/pub.launch">
+      <arg name="node_name" value="pub_sub41" />
+      <arg name="target_model_name" value="model8.1_0" /> 
+      <arg name="goal_pose_x"  value="5" />
+      <arg name="goal_pose_y"  value="-0.5" />
+      <arg name="/pose_stamped_topic"  value="/pose_stamped_topic41" />
+      <arg name="/path_topic"  value="/path_topic41" />
+      <arg name="/visualization_marker"  value="/visualization_marker41" />
+      <arg name="/visualization_marker_array"  value="/visualization_marker_array41" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub42" />
+     <arg name="target_model_name"  value="model8.1_1" />
+     <arg name="goal_pose_x"  value="4.7" />
+     <arg name="goal_pose_y"  value="-0.2" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic42" />
+     <arg name="/path_topic"  value="/path_topic42" />
+     <arg name="/visualization_marker"  value="/visualization_marker42" />
+     <arg name="/visualization_marker_array"  value="/visualization_marker_array42" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub43" />
+     <arg name="target_model_name" value="model8.2_0" />
+     <arg name="goal_pose_x"  value="5.7" />
+     <arg name="goal_pose_y"  value="0.2" />   
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic43" />
+     <arg name="/path_topic"  value="/path_topic43" />    
+     <arg name="/visualization_marker"  value="/visualization_marker43" />
+     <arg name="/visualization_marker_array"  value="/visualization_marker_array43" /> 
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub44" />
+     <arg name="target_model_name" value="model8.2_1" />
+     <arg name="goal_pose_x"  value="5.6" />
+     <arg name="goal_pose_y"  value="1.6" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic44" />
+     <arg name="/path_topic"  value="/path_topic44" />
+     <arg name="/visualization_marker"  value="/visualization_marker44" />
+     <arg name="/visualization_marker_array"  value="/visualization_marker_array44" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub45" />
+     <arg name="target_model_name"  value="model8.3_0" />
+     <arg name="goal_pose_x"  value="5.8" />
+     <arg name="goal_pose_y"  value="0.1" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic45" />
+     <arg name="/path_topic"  value="/path_topic45" />
+     <arg name="/visualization_marker"  value="/visualization_marker45" />
+     <arg name="/visualization_marker_array"  value="/visualization_marker_array45" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub46" />
+     <arg name="target_model_name" value="model8.3_1" />
+     <arg name="goal_pose_x"  value="6" />
+     <arg name="goal_pose_y"  value="2.3" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic46" />
+     <arg name="/path_topic"  value="/path_topic46" />
+     <arg name="/visualization_marker"  value="/visualization_marker46" />
+     <arg name="/visualization_marker_array"  value="/visualization_marker_array46" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub47" />
+     <arg name="target_model_name"  value="model8.4_0" />
+     <arg name="goal_pose_x"  value="5" />
+     <arg name="goal_pose_y"  value="-1.3" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic47" />
+     <arg name="/path_topic"  value="/path_topic47" />
+     <arg name="/visualization_marker"  value="/visualization_marker47" />
+     <arg name="/visualization_marker_array"  value="/visualization_marker_array47" />
+    </include>
+
+    <include file="src/orcawsdwa/launch/pub.launch">
+     <arg name="node_name" value="pub_sub48" />
+     <arg name="target_model_name"  value="model8.4_1" />
+     <arg name="goal_pose_x"  value="6.4" />
+     <arg name="goal_pose_y"  value="-1.3" />
+     <arg name="/pose_stamped_topic"  value="/pose_stamped_topic48" />
+     <arg name="/path_topic"  value="/path_topic48" />
+     <arg name="/visualization_marker"  value="/visualization_marker48" />
+     <arg name="/visualization_marker_array"  value="/visualization_marker_array48" />
+    </include>
+
+
 </launch>
-
-
+ -->
 
 
 

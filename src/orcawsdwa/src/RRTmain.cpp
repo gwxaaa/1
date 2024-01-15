@@ -129,7 +129,7 @@ namespace RVO
     // {
     //   std::cout << "222Node ID: " << node.id_ << ", x: " << node.x_ << ", y: " << node.y_ << std::endl;
     // }
-    ros::Rate rate(30);
+    ros::Rate rate(100);
     visualization_msgs::MarkerArray marker_array_msg;
     for (int i = 0; i < number_of_points - 1; i += 2)
     {
